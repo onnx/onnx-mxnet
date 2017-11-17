@@ -8,6 +8,9 @@
 # express or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+# Derived from Apache 2.0 licensed onnx.py file from DMLC NNVM:
+# https://github.com/dmlc/nnvm/blob/3da53e46db57c438b05fbebe8aa332ee8c5994d1/python/nnvm/frontend/onnx.py
+
 # coding: utf-8
 
 """ Support import export formats."""
