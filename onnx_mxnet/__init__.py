@@ -9,7 +9,7 @@
 # permissions and limitations under the License.
 
 # coding: utf-8
-from import_onnx import GraphProto
+from .import_onnx import GraphProto
 import onnx
 
 def import_model(model_file):
