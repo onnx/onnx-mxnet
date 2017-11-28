@@ -1,5 +1,8 @@
 # ONNX-MXNet
 
+[![Build Status](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiYm1ua2NEc3E5b3JIaUdnOGpjNHQ1Nmc3eWRCRnN0U2hXSTFsV0R4bnFhMjBkVDhSYWZHVUxPYXBzZjRyR0NKbGp4S0dQczhIckQ4VU8yNEJITEdKMXlFPSIsIml2UGFyYW1ldGVyU3BlYyI6IkVTUzNPYm5JdkxpOFFPaTMiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)](https://console.aws.amazon.com/codebuild/home?region=us-east-1#/projects/onnx-mxnet-ci-python-2/view)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 This repository implements ONNX model format support for Apache MXNet.
 
 With ONNX format support for MXNet, developers can build and train models with PyTorch, CNTK, or Caffe2, and import these models into MXNet to run them for inference using MXNet’s highly optimized engine.
