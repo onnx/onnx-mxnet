@@ -13,7 +13,7 @@
 
 # coding: utf-8
 
-from .common import Renamer, AttributeConverter as AttrCvt
+from onnx_mxnet.common import Renamer, AttributeConverter as AttrCvt
 
 def _revert_caffe2_pad(attr):
     """Removing extra padding from Caffe2."""
@@ -91,11 +91,17 @@ def _conv_transpose():
         disables=['output_shape'],
         custom_check=_dimension_constraint())
 
+def _change_eps_cudnn(attr):
+    """Limiting eps value to 1e-5 for cudnn batchnorm."""
+    if attr < 1e-5:
+        attr = 1e-4
+    return attr
+
 # converting attributes for BatchNorm operator
 def _batch_norm():
     return AttrCvt(
         op_name='BatchNorm',
-        transforms={'epsilon':'eps'},
+        transforms={'epsilon': ('eps', (1e-5), _change_eps_cudnn)},
         ignores=['spatial', 'is_test','consumed_inputs'])
 
 # converting attributes for LeakyRelu operator
@@ -106,14 +112,37 @@ def _activation(name):
             'alpha':'slope'},
         extras={'act_type': name})
 
-# [TODO] : Only 4d 5d tensor supported in mxnet.
+def _pad_sequence_fix(attr):
+    new_attr = ()
+    if len(attr)%2==0:
+        for index in range(len(attr) / 2):
+            new_attr = new_attr + attr[index::len(attr) / 2]
+    return new_attr
+
 # converting attributes for Pad operator
 def _pad():
     return AttrCvt(
         op_name='pad',
         transforms={
-            'paddings':'pad_width',
+            'pads': ('pad_width', (0,0,0,0,0,0,0,0),_pad_sequence_fix),
             'value':'constant_value'})
+
+# slicing only on 0th axis
+def _slice_attr_convert(attr):
+    if len(attr) == 1:
+        attr = attr[0]
+    else:
+        pass
+    return attr
+
+def _slice():
+    return AttrCvt(
+        op_name='slice_axis',
+        transforms={
+            'axes': ('axis', (1), _slice_attr_convert),
+            'ends': ('end', (1), _slice_attr_convert),
+            'starts': ('begin', (1), _slice_attr_convert),
+            })
 
 # Requires kernel attribute which is not present in onnx currently. So for now giving default kernel.
 def _global_pooling(name):
@@ -132,7 +161,6 @@ _convert_map = {
     'FC'            : AttrCvt('FullyConnected', ignores=['axis', 'axis_w']),
 
     # defs/generator
-    # 'Constant'
     'RandomUniform' : AttrCvt('random_uniform', ignores=['seed']),
     'RandomNormal'  : AttrCvt('random_normal', {'mean':'loc'}, ignores=['seed']),
     'RandomUniformLike' : AttrCvt('random_uniform', ignores=['seed']),
@@ -153,7 +181,7 @@ _convert_map = {
     'Sqrt'          : Renamer('sqrt'),
     'Gemm'          : AttrCvt('linalg_gemm', {'transA':'transpose_a', 'transB':'transpose_b'}, ignores=['broadcast']),
     'Relu'          : Renamer('relu'),
-    'LeakyRelu'     : Renamer('leaky'),
+    'LeakyRelu'     : AttrCvt('LeakyReLU', {'alpha', 'slope'}),
     # 'Selu'
     'Elu'           : _activation('elu'),
     'Exp'           : Renamer('exp'),
@@ -161,6 +189,7 @@ _convert_map = {
     'Tanh'          : Renamer('tanh'),
     'Pow'           : AttrCvt('pow', {'exponent':'exp'}),
     'Dot'           : Renamer('dot'),
+    'MatMul'        : Renamer('linalg_gemm2'),
     # 'PRelu'
     'Sigmoid'       : Renamer('sigmoid'),
     'Max'           : Renamer('maximum'), #elemwise maximum
@@ -197,7 +226,8 @@ _convert_map = {
     'Concat'        : AttrCvt('concat', {'axis': 'dim'}),
     'Split'         : AttrCvt('split', {'split': 'num_outputs'}),
     'Pad'           : _pad(),
-    'Slice'         : AttrCvt('slice', {'ends': 'end', 'starts': 'begin'}),
+    #'Slice'         : _slice(),
+    'Slice'         : AttrCvt('slice_axis', {'axes': 'axis', 'ends': 'end', 'starts': 'begin'}),
     'Transpose'     : AttrCvt('transpose', {'perm': 'axes'}),
     # 'Gather'
     # 'Squeeze'

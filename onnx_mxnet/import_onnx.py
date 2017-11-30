@@ -16,7 +16,7 @@
 """ Support import export formats."""
 from __future__ import absolute_import as _abs
 import mxnet as mx
-from .import_helper import _identity_list, _convert_map
+from onnx_mxnet.import_helper import _identity_list, _convert_map
 
 def _convert_operator(op_name, attrs, identity_list=None, convert_map=None):
     """Convert from onnx operator to mxnet operator.
@@ -119,7 +119,11 @@ class GraphProto(object):
             inputs = [self._nodes[self._renames.get(i, i)] for i in node.input]
             if op_name == 'Gemm':
                 new_op, inputs, new_attr = self._fix_gemm('FullyConnected', inputs, attr)
-            op = new_op(name=node_name, *inputs, **new_attr)
+            # onnx slice works on multiple axes whereas mxnet's slice_axis is for single axis
+            if op_name == 'Slice':
+                op = self._fix_slice('slice_axis', inputs, new_attr)
+            else:
+                op = new_op(name=node_name, *inputs, **new_attr)
             node_output = self._fix_outputs(op_name, node.output)
             assert len(node_output) == len(op.list_outputs()), (
                 "Number of output mismatch {} vs {} in {}.".format(
@@ -133,6 +137,40 @@ class GraphProto(object):
         else:
             out = out[0]
         return out, self._params
+
+    def _run_node(self, node, device='CPU'):
+        """Construct symbol from individual node.
+        Mainly using this function for unittests"""
+        op_name = node.op_type
+        attr = self._parse_attr(node.attribute)
+        new_op, new_attr = _convert_operator(op_name, attr)
+        sym_list = [mx.sym.Variable(node_name) for node_name in node.input]
+        # some workarounds for onnx problem
+        new_attr = self._fix_bias(new_op, new_attr, len(sym_list))
+        new_attr = self._fix_channels(new_op, new_attr, list(node.input))
+        # calling again to get new symbols after some workarounds
+        sym_list = [mx.sym.Variable(node_name) for node_name in node.input]
+        if op_name == 'Slice':
+            op = self._fix_slice('slice_axis', sym_list, new_attr)
+        else:
+            op = new_op(*sym_list, **new_attr)
+        node_output = self._fix_outputs(op_name, node.output)
+        for k, i in zip(list(node_output), range(len(node_output))):
+            self._nodes[k] = op[i]
+        # now return the outputs
+        return op
+
+    def _fix_slice(self, op_name, inputs, new_attr):
+        """onnx slice provides slicing on multiple axis. Adding multiple slice_axis operator
+        for multiple axes from mxnet"""
+        begin = new_attr.get('begin')
+        end = new_attr.get('end')
+        axes = new_attr.get('axis', tuple(range(len(begin))))
+        slice_op = mx.sym.slice_axis(inputs[0], axis=axes[0], begin=begin[0], end=end[0])
+        if len(axes) > 1:
+            for id, axis in enumerate(axes):
+                slice_op = mx.sym.slice_axis(slice_op, axis=axis, begin=begin[id], end=end[id])
+        return slice_op
 
     def _fix_gemm(self, op_name, inputs, old_attr):
         """Using FullyConnected operator in place of linalg_gemm to perform same operation"""
@@ -171,7 +209,7 @@ class GraphProto(object):
                     attrs[a.name] = tuple(getattr(a, f))
             for f in ['t', 'g']:
                 if a.HasField(f):
-                    raise NotImplementedError("Filed {} is not supported in mxnet.".format(f))
+                    attrs[a.name] = getattr(a, f)
             for f in ['tensors', 'graphs']:
                 if list(getattr(a, f)):
                     raise NotImplementedError("Filed {} is not supported in mxnet.".format(f))
