@@ -127,23 +127,6 @@ def _pad():
             'pads': ('pad_width', (0,0,0,0,0,0,0,0),_pad_sequence_fix),
             'value':'constant_value'})
 
-# slicing only on 0th axis
-def _slice_attr_convert(attr):
-    if len(attr) == 1:
-        attr = attr[0]
-    else:
-        pass
-    return attr
-
-def _slice():
-    return AttrCvt(
-        op_name='slice_axis',
-        transforms={
-            'axes': ('axis', (1), _slice_attr_convert),
-            'ends': ('end', (1), _slice_attr_convert),
-            'starts': ('begin', (1), _slice_attr_convert),
-            })
-
 # Requires kernel attribute which is not present in onnx currently. So for now giving default kernel.
 def _global_pooling(name):
     return AttrCvt(
@@ -226,7 +209,6 @@ _convert_map = {
     'Concat'        : AttrCvt('concat', {'axis': 'dim'}),
     'Split'         : AttrCvt('split', {'split': 'num_outputs'}),
     'Pad'           : _pad(),
-    #'Slice'         : _slice(),
     'Slice'         : AttrCvt('slice_axis', {'axes': 'axis', 'ends': 'end', 'starts': 'begin'}),
     'Transpose'     : AttrCvt('transpose', {'perm': 'axes'}),
     # 'Gather'

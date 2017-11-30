@@ -30,9 +30,7 @@ backend_test.exclude('test_inception_v1')
 backend_test.exclude('test_inception_v2')
 backend_test.exclude('test_resnet50')
 backend_test.exclude('test_shufflenet')
-#backend_test.exclude('test_squeezenet')
-#backend_test.exclude('test_vgg16')
-#backend_test.exclude('test_vgg19')
+
 # Not implemented
 backend_test.exclude('test_constant_cpu')
 
