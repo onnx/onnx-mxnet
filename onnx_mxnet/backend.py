@@ -15,16 +15,38 @@ import numpy as np
 from onnx.backend.base import Backend, BackendRep
 from collections import namedtuple
 
-"""Using these functions for onnx test infrastructure."""
+# Using these functions for onnx test infrastructure.
+# Implemented by following onnx docs guide:
+# https://github.com/onnx/onnx/blob/master/docs/Implementing%20an%20ONNX%20backend.md
+# MXNetBackend class will take an ONNX model with inputs, perform a computation,
+# and then return the output.
+# MXNetBackendRep object will be returned by MXNetBackend's prepare method which is used to
+# execute a model repeatedly.
+# We will pass inputs to the run function of MXNetBackendRep to retrieve the corresponding results.
+
 class MXNetBackend(Backend):
     @classmethod
     def run_node(cls, node, inputs, device='CPU'):
         """Running individual node inference on mxnet engine and
-        return the result to onnx test infrastructure."""
-        g = GraphProto()
-        sym = g._run_node(node)
+        return the result to onnx test infrastructure.
+
+        Parameters
+        ----------
+        node  : onnx node object
+            loaded onnx node (individual layer)
+        inputs : numpy array
+            input to run on operator on
+
+        Returns
+        -------
+        params : numpy array
+            result obtained after running the operator
+        """
+        graph = GraphProto()
+        sym = graph.run_node(node)
         data_names = [i for i in node.input]
         data_shapes = []
+
         # Adding extra dimension of batch_size 1 if the batch_size is different for multiple inputs.
         for idx, input_name in enumerate(data_names):
             batch_size = 1L
@@ -38,28 +60,44 @@ class MXNetBackend(Backend):
         # create a module
         mod = mx.mod.Module(symbol=sym, data_names=data_names, label_names=None)
         mod.bind(for_training=False, data_shapes=data_shapes, label_shapes=None)
+
         # initializing parameters for calculating result of each individual node
         mod.init_params()
-        from collections import namedtuple
+
         Batch = namedtuple('Batch', ['data'])
+
         data_forward = []
-        for v in inputs:
+        for val in inputs:
             # slice and pad operator tests needs 1 less dimension in forward pass
             # otherwise it will throw an error.
-            if node.op_type=='Slice' or node.op_type=='Pad':
-                data_forward.append(mx.nd.array(v))
+            if node.op_type == 'Slice' or node.op_type == 'Pad':
+                data_forward.append(mx.nd.array(val))
             else:
-                data_forward.append(mx.nd.array([v]))
+                data_forward.append(mx.nd.array([val]))
 
         mod.forward(Batch(data_forward))
         result = mod.get_outputs()[0].asnumpy()
-        if node.op_type=='Slice' or node.op_type=='Pad':
+        if node.op_type == 'Slice' or node.op_type == 'Pad':
             return [result]
         return result
 
     @classmethod
     def prepare(cls, model, device='CPU', **kwargs):
-        """For running end to end model(used for onnx test backend)"""
+        """For running end to end model(used for onnx test backend)
+
+        Parameters
+        ----------
+        model  : onnx ModelProto object
+            loaded onnx graph
+        device : 'CPU'
+            specifying device to run test on
+
+        Returns
+        -------
+        MXNetBackendRep : object
+            Returns object of MXNetBackendRep class which will be in turn
+            used to run inference on the input model and return the result for comparison.
+        """
         graph = GraphProto()
         sym, params = graph.from_onnx(model.graph)
         return MXNetBackendRep(sym, params)
@@ -73,17 +111,29 @@ class MXNetBackend(Backend):
 class MXNetBackendRep(BackendRep):
     """Running model inference on mxnet engine and return the result
      to onnx test infrastructure for comparison."""
-    def __init__(self, mxnet_symbol, params):
-        self.model = mxnet_symbol
+    def __init__(self, symbol, params):
+        self.symbol = symbol
         self.params = params
 
     def run(self, inputs, **kwargs):
-        """Run model inference and return the result"""
+        """Run model inference and return the result
+
+        Parameters
+        ----------
+        inputs : numpy array
+            input to run on operator on
+
+        Returns
+        -------
+        params : numpy array
+            result obtained after running the inference on mxnet
+        """
         input_data = np.asarray(inputs[0], dtype=np.float32)
         # create module
-        mod = mx.mod.Module(symbol=self.model, data_names=['input_0'], context=mx.cpu(), label_names=None)
+        mod = mx.mod.Module(symbol=self.symbol, data_names=['input_0'], context=mx.cpu(), label_names=None)
         mod.bind(for_training=False, data_shapes=[('input_0', input_data.shape)], label_shapes=None)
         mod.set_params(arg_params=self.params, aux_params=None)
+
         # run inference
         Batch = namedtuple('Batch', ['data'])
 

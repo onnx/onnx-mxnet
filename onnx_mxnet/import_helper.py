@@ -39,23 +39,23 @@ def _broadcast_constraint():
         return True
     return _broadcast_check, "Specifying broadcast axis not allowed."
 
-# checking dimensions for conv, deconv, pooling operators
 def _dimension_constraint():
+    """checking dimensions for conv, deconv, pooling operators"""
     def _dim_check(attrs):
         if len(attrs['kernel_shape']) == 2:
             return True
         return False
     return _dim_check, "Only 2d kernel supported."
 
-# converting attributes for add operator
 def _elemwise(name):
+    """converting attributes for add operator"""
     return AttrCvt(
         op_name=_math_name_picker(name),
         disables=['axis'],
         ignores=['broadcast'])
 
-# converting attributes for pooling operator
 def _pooling(name):
+    """converting attributes for pooling operator"""
     return AttrCvt(
         op_name='Pooling',
         transforms={
@@ -67,8 +67,8 @@ def _pooling(name):
         ignores=['dilations'],
         custom_check=_dimension_constraint())
 
-# converting attributes for convolution operator
 def _conv():
+    """converting attributes for convolution operator"""
     return AttrCvt(
         op_name='Convolution',
         transforms={
@@ -79,8 +79,8 @@ def _conv():
             'group': ('num_group', 1)},
         custom_check=_dimension_constraint())
 
-# converting attributes for deconvolution operator
 def _conv_transpose():
+    """converting attributes for deconvolution operator"""
     return AttrCvt(
         op_name='Deconvolution',
         transforms={
@@ -97,15 +97,15 @@ def _change_eps_cudnn(attr):
         attr = 1e-4
     return attr
 
-# converting attributes for BatchNorm operator
 def _batch_norm():
+    """converting attributes for BatchNorm operator"""
     return AttrCvt(
         op_name='BatchNorm',
         transforms={'epsilon': ('eps', (1e-5), _change_eps_cudnn)},
         ignores=['spatial', 'is_test','consumed_inputs'])
 
-# converting attributes for LeakyRelu operator
 def _activation(name):
+    """converting attributes for LeakyRelu operator"""
     return AttrCvt(
         op_name='LeakyReLU',
         transforms={
@@ -113,22 +113,25 @@ def _activation(name):
         extras={'act_type': name})
 
 def _pad_sequence_fix(attr):
+    """Changing onnx's pads sequence to match with mxnet's pad_width
+    mxnet: (x1_begin, x1_end, ... , xn_begin, xn_end)
+    onnx: (x1_begin, x2_begin, ... , xn_end, xn_end)"""
     new_attr = ()
     if len(attr)%2==0:
         for index in range(len(attr) / 2):
             new_attr = new_attr + attr[index::len(attr) / 2]
     return new_attr
 
-# converting attributes for Pad operator
 def _pad():
+    """converting attributes for Pad operator"""
     return AttrCvt(
         op_name='pad',
         transforms={
             'pads': ('pad_width', (0,0,0,0,0,0,0,0),_pad_sequence_fix),
             'value':'constant_value'})
 
-# Requires kernel attribute which is not present in onnx currently. So for now giving default kernel.
 def _global_pooling(name):
+    """Requires kernel attribute which is not present in onnx currently. So for now giving default kernel."""
     return AttrCvt(
         op_name='Pooling',
         extras={'global_pool': True,
