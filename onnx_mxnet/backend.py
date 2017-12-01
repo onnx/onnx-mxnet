@@ -29,10 +29,12 @@ class MXNetBackend(Backend):
 
         Parameters
         ----------
-        node  : onnx node object
+        node   : onnx node object
             loaded onnx node (individual layer)
         inputs : numpy array
-            input to run on operator on
+            input to run a node on
+        device : 'CPU'
+            device to run a node on
 
         Returns
         -------
@@ -54,8 +56,14 @@ class MXNetBackend(Backend):
             else:
                 data_shapes.append((input_name, inputs[idx].shape))
 
+        # create module, passing cpu context
+        if device == 'CPU':
+            ctx = mx.cpu()
+        else:
+            raise NotImplementedError("Only CPU context is supported for now")
+
         # create a module
-        mod = mx.mod.Module(symbol=sym, data_names=data_names, label_names=None)
+        mod = mx.mod.Module(symbol=sym, data_names=data_names, context=ctx, label_names=None)
         mod.bind(for_training=False, data_shapes=data_shapes, label_shapes=None)
 
         # initializing parameters for calculating result of each individual node
@@ -88,6 +96,8 @@ class MXNetBackend(Backend):
             loaded onnx graph
         device : 'CPU'
             specifying device to run test on
+        kwargs :
+            other arguments
 
         Returns
         -------
@@ -97,7 +107,7 @@ class MXNetBackend(Backend):
         """
         graph = GraphProto()
         sym, params = graph.from_onnx(model.graph)
-        return MXNetBackendRep(sym, params)
+        return MXNetBackendRep(sym, params, device)
 
     @classmethod
     def supports_device(cls, device):
