@@ -10,9 +10,9 @@
 
 # coding: utf-8
 from .import_onnx import GraphProto
+from .backend_rep import MXNetBackendRep
 import mxnet as mx
-import numpy as np
-from onnx.backend.base import Backend, BackendRep
+from onnx.backend.base import Backend
 from collections import namedtuple
 
 # Using these functions for onnx test infrastructure.
@@ -20,9 +20,6 @@ from collections import namedtuple
 # https://github.com/onnx/onnx/blob/master/docs/Implementing%20an%20ONNX%20backend.md
 # MXNetBackend class will take an ONNX model with inputs, perform a computation,
 # and then return the output.
-# MXNetBackendRep object will be returned by MXNetBackend's prepare method which is used to
-# execute a model repeatedly.
-# We will pass inputs to the run function of MXNetBackendRep to retrieve the corresponding results.
 
 class MXNetBackend(Backend):
     @classmethod
@@ -106,40 +103,6 @@ class MXNetBackend(Backend):
     def supports_device(cls, device):
         """Supports only CPU for testing"""
         return device == 'CPU'
-
-
-class MXNetBackendRep(BackendRep):
-    """Running model inference on mxnet engine and return the result
-     to onnx test infrastructure for comparison."""
-    def __init__(self, symbol, params):
-        self.symbol = symbol
-        self.params = params
-
-    def run(self, inputs, **kwargs):
-        """Run model inference and return the result
-
-        Parameters
-        ----------
-        inputs : numpy array
-            input to run on operator on
-
-        Returns
-        -------
-        params : numpy array
-            result obtained after running the inference on mxnet
-        """
-        input_data = np.asarray(inputs[0], dtype=np.float32)
-        # create module
-        mod = mx.mod.Module(symbol=self.symbol, data_names=['input_0'], context=mx.cpu(), label_names=None)
-        mod.bind(for_training=False, data_shapes=[('input_0', input_data.shape)], label_shapes=None)
-        mod.set_params(arg_params=self.params, aux_params=None)
-
-        # run inference
-        Batch = namedtuple('Batch', ['data'])
-
-        mod.forward(Batch([mx.nd.array(input_data)]))
-        result = mod.get_outputs()[0].asnumpy()
-        return [result]
 
 prepare = MXNetBackend.prepare
 
