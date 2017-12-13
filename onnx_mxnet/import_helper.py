@@ -147,6 +147,7 @@ _convert_map = {
     'FC'            : AttrCvt('FullyConnected', ignores=['axis', 'axis_w']),
 
     # defs/generator
+    'Constant': Renamer('identity'),
     'RandomUniform' : AttrCvt('random_uniform', ignores=['seed']),
     'RandomNormal'  : AttrCvt('random_normal', {'mean':'loc'}, ignores=['seed']),
     'RandomUniformLike' : AttrCvt('random_uniform', ignores=['seed']),
@@ -167,7 +168,7 @@ _convert_map = {
     'Sqrt'          : Renamer('sqrt'),
     'Gemm'          : AttrCvt('linalg_gemm', {'transA':'transpose_a', 'transB':'transpose_b'}, ignores=['broadcast']),
     'Relu'          : Renamer('relu'),
-    'LeakyRelu'     : AttrCvt('LeakyReLU', {'alpha', 'slope'}),
+    'LeakyRelu'     : AttrCvt('LeakyReLU', {'alpha': 'slope'}),
     # 'Selu'
     'Elu'           : _activation('elu'),
     'Exp'           : Renamer('exp'),
