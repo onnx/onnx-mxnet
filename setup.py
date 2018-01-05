@@ -14,7 +14,7 @@ pkgs = find_packages()
 
 setup(
     name='onnx-mxnet',
-    version='0.2',
+    version='0.3',
     description='ONNX-MXNet Model converter',
     url='https://github.com/onnx/onnx-mxnet',
     keywords='ONNX MXNet model converter deep learning',
