@@ -10,6 +10,8 @@
 
 from __future__ import absolute_import as _abs
 from __future__ import print_function
+from future.standard_library import install_aliases
+install_aliases()
 import mxnet as mx
 import numpy as np
 import os
