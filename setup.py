@@ -8,13 +8,15 @@
 # express or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+# pylint: disable=invalid-name, exec-used
+"""Setup onnx-mxnet package"""
 from setuptools import setup, find_packages
 
 pkgs = find_packages()
 
 setup(
     name='onnx-mxnet',
-    version='0.3',
+    version='0.3.1',
     description='ONNX-MXNet Model converter',
     url='https://github.com/onnx/onnx-mxnet',
     keywords='ONNX MXNet model converter deep learning',

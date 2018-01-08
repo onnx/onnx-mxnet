@@ -9,11 +9,13 @@
 # permissions and limitations under the License.
 
 # coding: utf-8
-from .import_onnx import GraphProto
-from .backend_rep import MXNetBackendRep
+# pylint: disable=too-many-locals,invalid-name
+"""backend wrapper for onnx test infrastructure"""
+from collections import namedtuple
 import mxnet as mx
 from onnx.backend.base import Backend
-from collections import namedtuple
+from .import_onnx import GraphProto
+from .backend_rep import MXNetBackendRep
 
 # Using these functions for onnx test infrastructure.
 # Implemented by following onnx docs guide:
@@ -22,6 +24,7 @@ from collections import namedtuple
 # and then return the output.
 
 class MXNetBackend(Backend):
+    """MXNet backend for ONNX"""
     @classmethod
     def run_node(cls, node, inputs, device='CPU'):
         """Running individual node inference on mxnet engine and
@@ -48,8 +51,9 @@ class MXNetBackend(Backend):
 
         # Adding extra dimension of batch_size 1 if the batch_size is different for multiple inputs.
         for idx, input_name in enumerate(data_names):
-            batch_size = 1L
-            if len(inputs[idx].shape) < 4 and len(inputs) > 1 and len(set(x.shape[0] for x in inputs)) != 1:
+            batch_size = 1
+            if len(inputs[idx].shape) < 4 and len(inputs) > 1 and \
+                            len(set(x.shape[0] for x in inputs)) != 1:
                 tuples = ((batch_size,), inputs[idx].shape)
                 new_shape = sum(tuples, ())
                 data_shapes.append((input_name, new_shape))
@@ -69,7 +73,7 @@ class MXNetBackend(Backend):
         # initializing parameters for calculating result of each individual node
         mod.init_params()
 
-        Batch = namedtuple('Batch', ['data'])
+        batch = namedtuple('Batch', ['data'])
 
         data_forward = []
         for val in inputs:
@@ -80,7 +84,7 @@ class MXNetBackend(Backend):
             else:
                 data_forward.append(mx.nd.array([val]))
 
-        mod.forward(Batch(data_forward))
+        mod.forward(batch(data_forward))
         result = mod.get_outputs()[0].asnumpy()
         if node.op_type == 'Slice' or node.op_type == 'Pad':
             return [result]

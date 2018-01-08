@@ -12,7 +12,7 @@
 # https://github.com/dmlc/nnvm/blob/3da53e46db57c438b05fbebe8aa332ee8c5994d1/python/nnvm/frontend/common.py
 
 # coding: utf-8
-
+# pylint: disable=invalid-name,no-self-use,too-many-branches,too-few-public-methods,too-many-arguments
 """Shared functions and classes for frontends."""
 from __future__ import absolute_import as _abs
 import warnings

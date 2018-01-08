@@ -12,7 +12,8 @@
 # https://github.com/dmlc/nnvm/blob/3da53e46db57c438b05fbebe8aa332ee8c5994d1/python/nnvm/frontend/onnx.py
 
 # coding: utf-8
-
+# pylint: disable=invalid-name
+"""Operator attributes conversion"""
 from onnx_mxnet.common import Renamer, AttributeConverter as AttrCvt
 
 def _revert_caffe2_pad(attr):
@@ -74,8 +75,8 @@ def _conv():
         transforms={
             'kernel_shape': 'kernel',
             'strides': 'stride',
-            'dilations': ('dilate', (0,0)),
-            'pads': ('pad', (0,0), _revert_caffe2_pad),
+            'dilations': ('dilate', (0, 0)),
+            'pads': ('pad', (0, 0), _revert_caffe2_pad),
             'group': ('num_group', 1)},
         custom_check=_dimension_constraint())
 
@@ -102,7 +103,7 @@ def _batch_norm():
     return AttrCvt(
         op_name='BatchNorm',
         transforms={'epsilon': ('eps', (1e-5), _change_eps_cudnn)},
-        ignores=['spatial', 'is_test','consumed_inputs'])
+        ignores=['spatial', 'is_test', 'consumed_inputs'])
 
 def _activation(name):
     """converting attributes for LeakyRelu operator"""
@@ -117,7 +118,7 @@ def _pad_sequence_fix(attr):
     mxnet: (x1_begin, x1_end, ... , xn_begin, xn_end)
     onnx: (x1_begin, x2_begin, ... , xn_end, xn_end)"""
     new_attr = ()
-    if len(attr)%2==0:
+    if len(attr)%2 == 0:
         for index in range(len(attr) / 2):
             new_attr = new_attr + attr[index::len(attr) / 2]
     return new_attr
@@ -127,15 +128,16 @@ def _pad():
     return AttrCvt(
         op_name='pad',
         transforms={
-            'pads': ('pad_width', (0,0,0,0,0,0,0,0),_pad_sequence_fix),
+            'pads': ('pad_width', (0, 0, 0, 0, 0, 0, 0, 0), _pad_sequence_fix),
             'value':'constant_value'})
 
 def _global_pooling(name):
-    """Requires kernel attribute which is not present in onnx currently. So for now giving default kernel."""
+    """Requires kernel attribute which is not present in onnx currently.
+    So for now giving default kernel."""
     return AttrCvt(
         op_name='Pooling',
         extras={'global_pool': True,
-                'kernel': (1,1),
+                'kernel': (1, 1),
                 'pool_type': name})
 
 # compatible operators that do NOT require any conversion.
@@ -166,7 +168,8 @@ _convert_map = {
     'Floor'         : Renamer('floor'),
     'Ceil'          : Renamer('ceil'),
     'Sqrt'          : Renamer('sqrt'),
-    'Gemm'          : AttrCvt('linalg_gemm', {'transA':'transpose_a', 'transB':'transpose_b'}, ignores=['broadcast']),
+    'Gemm'          : AttrCvt('linalg_gemm', {'transA':'transpose_a', 'transB':'transpose_b'},
+                              ignores=['broadcast']),
     'Relu'          : Renamer('relu'),
     'LeakyRelu'     : AttrCvt('LeakyReLU', {'alpha': 'slope'}),
     # 'Selu'

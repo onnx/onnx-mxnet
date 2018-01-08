@@ -10,6 +10,7 @@
 
 # coding: utf-8
 from __future__ import absolute_import as _abs
+from __future__ import print_function
 import mxnet as mx
 import numpy as np
 import os
@@ -38,12 +39,12 @@ def _as_abs_path(fname):
 
 # download test image
 def download(url, path, overwrite=False):
-    import urllib2, os
+    from urllib.request import urlopen
     if os.path.exists(path) and not overwrite:
         return
     print('Downloading {} to {}.'.format(url, path))
     with open(path, 'w') as f:
-        f.write(urllib2.urlopen(url).read())
+        f.write(urlopen(url).read())
 
 def extract_file(model_tar):
     # extract tar file
@@ -61,7 +62,7 @@ def extract_file(model_tar):
     return model_path, input_data, output_data
 
 def verify_onnx_forward_impl(model_path, input_data, output_data):
-    print "Converting onnx format to mxnet's symbol and params..."
+    print("Converting onnx format to mxnet's symbol and params...")
     sym, params = onnx_mxnet.import_model(model_path)
     # create module
     mod = mx.mod.Module(symbol=sym, data_names=['input_0'], context=mx.cpu(), label_names=None)
@@ -75,10 +76,10 @@ def verify_onnx_forward_impl(model_path, input_data, output_data):
     # Run the model with an onnx backend and verify the results
     npt.assert_equal(mod.get_outputs()[0].shape, output_data.shape)
     npt.assert_almost_equal(output_data, mod.get_outputs()[0].asnumpy(), decimal=3)
-    print "Conversion Successful"
+    print("Conversion Successful")
 
 def verify_model(name):
-    print "Testing model ", name
+    print("Testing model ", name)
     download(URLS.get(name), name, False)
     model_path, inputs, outputs = extract_file(name)
     input_data = np.asarray(inputs[0], dtype=np.float32)

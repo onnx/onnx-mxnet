@@ -9,6 +9,7 @@
 # permissions and limitations under the License.
 
 from __future__ import absolute_import as _abs
+from __future__ import print_function
 import mxnet as mx
 import numpy as np
 import os
@@ -22,18 +23,18 @@ def _as_abs_path(fname):
 
 # download test image
 def download(url, path, overwrite=False):
-    import urllib2, os
+    from urllib.request import urlopen
     if os.path.exists(path) and not overwrite:
         return
     print('Downloading {} to {}.'.format(url, path))
     with open(path, 'w') as f:
-        f.write(urllib2.urlopen(url).read())
+        f.write(urlopen(url).read())
 
 model_url = 'https://s3.amazonaws.com/onnx-mxnet/examples/super_resolution.onnx'
 
 download(model_url, 'super_resolution.onnx')
 
-print "Converting onnx format to mxnet's symbol and params..."
+print("Converting onnx format to mxnet's symbol and params...")
 sym, params = onnx_mxnet.import_model('super_resolution.onnx')
 
 # Load test image
