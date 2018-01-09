@@ -25,7 +25,7 @@ def _as_abs_path(fname):
 
 # download test image
 def download(url, path, overwrite=False):
-    from urllib.request import urlopen
+    from six.moves.urllib.request import urlopen
     if os.path.exists(path) and not overwrite:
         return
     print('Downloading {} to {}.'.format(url, path))

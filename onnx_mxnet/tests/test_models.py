@@ -11,8 +11,6 @@
 # coding: utf-8
 from __future__ import absolute_import as _abs
 from __future__ import print_function
-from future.standard_library import install_aliases
-install_aliases()
 import mxnet as mx
 import numpy as np
 import os
@@ -41,7 +39,7 @@ def _as_abs_path(fname):
 
 # download test image
 def download(url, path, overwrite=False):
-    from urllib.request import urlopen
+    from six.moves.urllib.request import urlopen
     if os.path.exists(path) and not overwrite:
         return
     print('Downloading {} to {}.'.format(url, path))
