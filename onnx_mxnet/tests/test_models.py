@@ -50,7 +50,7 @@ def extract_file(model_tar):
     return model_path, input_data, output_data
 
 def verify_onnx_forward_impl(model_path, input_data, output_data):
-    """Werifies result after inference"""
+    """Verifies result after inference"""
     print("Converting onnx format to mxnet's symbol and params...")
     sym, params = onnx_mxnet.import_model(model_path)
     # create module
