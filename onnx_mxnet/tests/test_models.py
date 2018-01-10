@@ -9,42 +9,34 @@
 # permissions and limitations under the License.
 
 # coding: utf-8
+"""Testing model conversions from onnx/models repo"""
 from __future__ import absolute_import as _abs
 from __future__ import print_function
-import mxnet as mx
-import numpy as np
-import os
-import numpy.testing as npt
-
-import onnx_mxnet
 from collections import namedtuple
+import os
 import tarfile
+import mxnet as mx
+from mxnet.test_utils import download
+import numpy as np
+import numpy.testing as npt
+import onnx_mxnet
 
 URLS = {
-'squeezenet_onnx' : 'https://s3.amazonaws.com/download.onnx/models/squeezenet.tar.gz',
-'shufflenet_onnx' : 'https://s3.amazonaws.com/download.onnx/models/shufflenet.tar.gz',
-'inception_v1_onnx' : 'https://s3.amazonaws.com/download.onnx/models/inception_v1.tar.gz',
-'inception_v2_onnx' : 'https://s3.amazonaws.com/download.onnx/models/inception_v2.tar.gz',
-'bvlc_alexnet_onnx' : 'https://s3.amazonaws.com/download.onnx/models/bvlc_alexnet.tar.gz',
-'densenet121_onnx' : 'https://s3.amazonaws.com/download.onnx/models/densenet121.tar.gz',
-'resnet50_onnx' : 'https://s3.amazonaws.com/download.onnx/models/resnet50.tar.gz',
-'vgg16_onnx' : 'https://s3.amazonaws.com/download.onnx/models/vgg16.tar.gz',
-'vgg19_onnx' : 'https://s3.amazonaws.com/download.onnx/models/vgg19.tar.gz'
+    'squeezenet_onnx' : 'https://s3.amazonaws.com/download.onnx/models/squeezenet.tar.gz',
+    'shufflenet_onnx' : 'https://s3.amazonaws.com/download.onnx/models/shufflenet.tar.gz',
+    'inception_v1_onnx' : 'https://s3.amazonaws.com/download.onnx/models/inception_v1.tar.gz',
+    'inception_v2_onnx' : 'https://s3.amazonaws.com/download.onnx/models/inception_v2.tar.gz',
+    'bvlc_alexnet_onnx' : 'https://s3.amazonaws.com/download.onnx/models/bvlc_alexnet.tar.gz',
+    'densenet121_onnx' : 'https://s3.amazonaws.com/download.onnx/models/densenet121.tar.gz',
+    'resnet50_onnx' : 'https://s3.amazonaws.com/download.onnx/models/resnet50.tar.gz',
+    'vgg16_onnx' : 'https://s3.amazonaws.com/download.onnx/models/vgg16.tar.gz',
+    'vgg19_onnx' : 'https://s3.amazonaws.com/download.onnx/models/vgg19.tar.gz'
 }
 
 # load protobuf format
 def _as_abs_path(fname):
     cur_dir = os.path.abspath(os.path.dirname(__file__))
     return os.path.join(cur_dir, fname)
-
-# download test image
-def download(url, path, overwrite=False):
-    from six.moves.urllib.request import urlopen
-    if os.path.exists(path) and not overwrite:
-        return
-    print('Downloading {} to {}.'.format(url, path))
-    with open(path, 'w') as f:
-        f.write(urlopen(url).read())
 
 def extract_file(model_tar):
     # extract tar file
@@ -80,7 +72,7 @@ def verify_onnx_forward_impl(model_path, input_data, output_data):
 
 def verify_model(name):
     print("Testing model ", name)
-    download(URLS.get(name), name, False)
+    download(URLS.get(name), name)
     model_path, inputs, outputs = extract_file(name)
     input_data = np.asarray(inputs[0], dtype=np.float32)
     output_data = np.asarray(outputs[0], dtype=np.float32)
