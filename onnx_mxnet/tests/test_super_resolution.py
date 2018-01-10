@@ -11,17 +11,11 @@
 from __future__ import absolute_import as _abs
 from __future__ import print_function
 from collections import namedtuple
-from PIL import Image
-import os
 import mxnet as mx
 from mxnet.test_utils import download
 import numpy as np
+from PIL import Image
 import onnx_mxnet
-
-# load protobuf format
-def _as_abs_path(fname):
-    cur_dir = os.path.abspath(os.path.dirname(__file__))
-    return os.path.join(cur_dir, fname)
 
 model_url = 'https://s3.amazonaws.com/onnx-mxnet/examples/super_resolution.onnx'
 

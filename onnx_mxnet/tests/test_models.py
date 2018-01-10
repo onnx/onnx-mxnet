@@ -33,12 +33,8 @@ URLS = {
     'vgg19_onnx' : 'https://s3.amazonaws.com/download.onnx/models/vgg19.tar.gz'
 }
 
-# load protobuf format
-def _as_abs_path(fname):
-    cur_dir = os.path.abspath(os.path.dirname(__file__))
-    return os.path.join(cur_dir, fname)
-
 def extract_file(model_tar):
+    """Extract tar file and returns model path and input, output data"""
     # extract tar file
     tar = tarfile.open(model_tar, "r:gz")
     tar.extractall()
@@ -54,6 +50,7 @@ def extract_file(model_tar):
     return model_path, input_data, output_data
 
 def verify_onnx_forward_impl(model_path, input_data, output_data):
+    """Werifies result after inference"""
     print("Converting onnx format to mxnet's symbol and params...")
     sym, params = onnx_mxnet.import_model(model_path)
     # create module
@@ -71,6 +68,7 @@ def verify_onnx_forward_impl(model_path, input_data, output_data):
     print("Conversion Successful")
 
 def verify_model(name):
+    """Testing models from onnx model zoo"""
     print("Testing model ", name)
     download(URLS.get(name), name)
     model_path, inputs, outputs = extract_file(name)
