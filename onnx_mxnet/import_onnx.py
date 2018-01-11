@@ -105,7 +105,7 @@ class GraphProto(object):
                 self._nodes[name_input] = mx.sym.Variable(name=name_input)
                 self._renames[i.name] = name_input
 
-        # construct nodes, nodes are stored as directed acyclic graph
+        # constructing nodes, nodes are stored as directed acyclic graph
         # converting NodeProto message
         for idx, node in enumerate(graph.node):
             op_name = node.op_type
