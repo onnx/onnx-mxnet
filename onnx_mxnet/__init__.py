@@ -9,8 +9,9 @@
 # permissions and limitations under the License.
 
 # coding: utf-8
-from .import_onnx import GraphProto
+"""import function"""
 import onnx
+from .import_onnx import GraphProto
 
 def import_model(model_file):
     """Imports the supplied ONNX model file into MXNet symbol and parameters.

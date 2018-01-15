@@ -12,7 +12,7 @@
 # https://github.com/dmlc/nnvm/blob/3da53e46db57c438b05fbebe8aa332ee8c5994d1/python/nnvm/frontend/onnx.py
 
 # coding: utf-8
-
+# pylint: disable=invalid-name,too-many-locals,no-self-use
 """ Support import export formats."""
 from __future__ import absolute_import as _abs
 import mxnet as mx
@@ -96,7 +96,8 @@ class GraphProto(object):
                 name_param = 'param_{}'.format(self._num_param)
                 self._num_param += 1
                 self._params[name_param] = self._params.pop(i.name)
-                self._nodes[name_param] = mx.sym.Variable(name=name_param, shape=self._params[name_param].shape)
+                self._nodes[name_param] = mx.sym.Variable(name=name_param,
+                                                          shape=self._params[name_param].shape)
                 self._renames[i.name] = name_param
             else:
                 name_input = 'input_{}'.format(self._num_input)
@@ -104,7 +105,7 @@ class GraphProto(object):
                 self._nodes[name_input] = mx.sym.Variable(name=name_input)
                 self._renames[i.name] = name_input
 
-        # construct nodes, nodes are stored as directed acyclic graph
+        # constructing nodes, nodes are stored as directed acyclic graph
         # converting NodeProto message
         for idx, node in enumerate(graph.node):
             op_name = node.op_type
@@ -147,7 +148,7 @@ class GraphProto(object):
             out = out[0]
         return out, self._params
 
-    def run_node(self, node, device='CPU'):
+    def run_node(self, node, device='CPU'): # pylint: disable=unused-argument
         """Construct symbol from individual node.
         Mainly using this function for unittests"""
         op_name = node.op_type
@@ -183,8 +184,8 @@ class GraphProto(object):
         axes = new_attr.get('axis', tuple(range(len(begin))))
         slice_op = mx.sym.slice_axis(inputs[0], axis=axes[0], begin=begin[0], end=end[0])
         if len(axes) > 1:
-            for id, axis in enumerate(axes):
-                slice_op = mx.sym.slice_axis(slice_op, axis=axis, begin=begin[id], end=end[id])
+            for i, axis in enumerate(axes):
+                slice_op = mx.sym.slice_axis(slice_op, axis=axis, begin=begin[i], end=end[i])
         return slice_op
 
     def _fix_gemm(self, op_name, inputs, old_attr):
