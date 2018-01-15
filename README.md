@@ -3,6 +3,7 @@
 | ubuntu/python-2.7 | ubuntu/python-3.5 |
 |---------|---------|
 | ![Python3 Build Status](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiYm1ua2NEc3E5b3JIaUdnOGpjNHQ1Nmc3eWRCRnN0U2hXSTFsV0R4bnFhMjBkVDhSYWZHVUxPYXBzZjRyR0NKbGp4S0dQczhIckQ4VU8yNEJITEdKMXlFPSIsIml2UGFyYW1ldGVyU3BlYyI6IkVTUzNPYm5JdkxpOFFPaTMiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master) | ![Python3 Build Status](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiVyttUUV3YzFCNnA2ZUJRTkwzQThTMVhzRW1GRGxZUFF3UXNFV05ZZE5ZWHYwcU84VEptcXc4ZE5kNVFPeVFpWWdoeDFxSGhMTGlGdjE0R2JRbnpPQStzPSIsIml2UGFyYW1ldGVyU3BlYyI6IkpmdjZVZytGOXRvQmU5VWgiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master) |
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This repository implements ONNX model format support for Apache MXNet.
