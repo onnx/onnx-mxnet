@@ -62,10 +62,9 @@ def _pooling(name):
         transforms={
             'kernel_shape': 'kernel',
             'strides': 'stride',
-            'pads': ('pad', (0, 0), _revert_caffe2_pad)},
+            'pads': 'pad'},
         # pooling convention full to match caffe2
-        extras={'pool_type': name, 'pooling_convention':'full'},
-        ignores=['dilations'],
+        extras={'pool_type': name, 'pooling_convention':'valid'},
         custom_check=_dimension_constraint())
 
 def _conv():
@@ -88,14 +87,15 @@ def _conv_transpose():
             'kernel_shape': 'kernel',
             'strides': 'stride',
             'dilations': ('dilate', (0, 0)),
-            'pads': ('pad', (0, 0), _revert_caffe2_pad)},
+            'pads': ('pad', (0, 0), _revert_caffe2_pad),
+            'group': ('num_group', 1)},
         disables=['output_shape'],
         custom_check=_dimension_constraint())
 
 def _change_eps_cudnn(attr):
     """Limiting eps value to 1e-5 for cudnn batchnorm."""
-    if attr < 1e-5:
-        attr = 1e-4
+    # if attr < 1e-5:
+    #     attr = 1e-4
     return attr
 
 def _batch_norm():

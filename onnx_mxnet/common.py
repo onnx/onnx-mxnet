@@ -93,8 +93,6 @@ class AttributeConverter(object):
         for k in attrs.keys():
             if k in self._excludes:
                 raise NotImplementedError("Attribute {} not supported yet.".format(k))
-            elif k in self._disables:
-                warnings.warn("Attribute {} is disabled in sym.{}".format(k, op_name))
             elif k in self._ignores:
                 pass
             elif k in self._transforms:
