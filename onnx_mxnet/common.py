@@ -15,7 +15,6 @@
 # pylint: disable=invalid-name,no-self-use,too-many-branches,too-few-public-methods,too-many-arguments
 """Shared functions and classes for frontends."""
 from __future__ import absolute_import as _abs
-import warnings
 from mxnet.base import string_types
 
 class Renamer(object):

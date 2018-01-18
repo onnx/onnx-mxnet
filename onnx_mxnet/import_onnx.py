@@ -112,9 +112,7 @@ class GraphProto(object):
             node_name = node.name.strip()
             node_name = node_name if node_name else None
             onnx_attr = self._parse_attr(node.attribute)
-            print(op_name, onnx_attr)
             new_op, mx_attr = _convert_operator(op_name, onnx_attr)
-            print(new_op, mx_attr)
             inputs = [self._nodes[self._renames.get(i, i)] for i in node.input]
 
             # some workarounds for onnx problem
@@ -183,34 +181,17 @@ class GraphProto(object):
         # now return the outputs
         return op
 
-    def _fix_conv(self, inputs, onnx_attr, mx_attr):
-        """onnx convolution operator padding symmetrical"""
-        print("rohan ", inputs, onnx_attr, mx_attr)
-        dilations = onnx_attr.get('dilations', (1, 1))
-        group = onnx_attr.get('group', 1)
-        stride = onnx_attr.get('strides', (1, 1))
-        kernel = onnx_attr.get('kernel_shape')
-        padding = onnx_attr.get('pads')
-        num_filter = mx_attr.get('num_filter')
-        pad_width = (0, 0, 0, 0) + _pad_sequence_fix(padding)
-        new_pad_op = mx.sym.pad(inputs[0], mode='constant', pad_width=pad_width)
-        print(new_pad_op)
-        new_conv_op = mx.sym.Convolution(new_pad_op, inputs[1], dilate=dilations, num_filter=num_filter, num_group=group,
-                                            stride=stride, kernel=kernel)
-        print(new_conv_op, inputs, onnx_attr, mx_attr)
-        return new_conv_op
-
     def _fix_pooling(self, op_name, inputs, new_attr):
-        """onnx pooling operator padding symmetrical"""
+        """onnx pooling operator supports asymmetrical padding
+        Adding pad operator before pooling in mxnet to work with onnx"""
         pool_type = 'avg' if op_name == 'AveragePool' else 'max'
         stride = new_attr.get('strides')
         kernel = new_attr.get('kernel_shape')
         padding = new_attr.get('pads')
         pad_width = (0, 0, 0, 0) + _pad_sequence_fix(padding)
         new_pad_op = mx.sym.pad(inputs[0], mode='constant', pad_width=pad_width)
-        print(new_pad_op)
-        new_pooling_op = mx.sym.Pooling(new_pad_op, pool_type=pool_type, stride=stride, kernel=kernel)
-        print(new_pooling_op, inputs,new_attr)
+        new_pooling_op = mx.sym.Pooling(new_pad_op, pool_type=pool_type,
+                                        stride=stride, kernel=kernel)
         return new_pooling_op
 
     def _fix_slice(self, inputs, new_attr):
