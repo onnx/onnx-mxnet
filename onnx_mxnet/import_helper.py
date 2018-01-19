@@ -119,7 +119,7 @@ def _pad_sequence_fix(attr):
     onnx: (x1_begin, x2_begin, ... , xn_end, xn_end)"""
     new_attr = ()
     if len(attr)%2 == 0:
-        for index in range(len(attr) / 2):
+        for index in range(len(int(attr)) / 2):
             new_attr = new_attr + attr[index::len(attr) / 2]
     return new_attr
 
