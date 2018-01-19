@@ -120,7 +120,7 @@ def _pad_sequence_fix(attr):
     new_attr = ()
     if len(attr) % 2 == 0:
         for index in range(int(len(attr) / 2)):
-            new_attr = new_attr + attr[index::len(attr) / 2]
+            new_attr = new_attr + attr[index::int(len(attr)) / 2]
     return new_attr
 
 def _pad():
