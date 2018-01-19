@@ -118,8 +118,8 @@ def _pad_sequence_fix(attr):
     mxnet: (x1_begin, x1_end, ... , xn_begin, xn_end)
     onnx: (x1_begin, x2_begin, ... , xn_end, xn_end)"""
     new_attr = ()
-    if len(attr)%2 == 0:
-        for index in range(len(int(attr)) / 2):
+    if len(attr) % 2 == 0:
+        for index in range(int(len(attr) / 2)):
             new_attr = new_attr + attr[index::len(attr) / 2]
     return new_attr
 
