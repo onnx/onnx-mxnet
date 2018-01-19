@@ -92,17 +92,12 @@ def _conv_transpose():
         disables=['output_shape'],
         custom_check=_dimension_constraint())
 
-def _change_eps_cudnn(attr):
-    """Limiting eps value to 1e-5 for cudnn batchnorm."""
-    # if attr < 1e-5:
-    #     attr = 1e-4
-    return attr
-
 def _batch_norm():
     """converting attributes for BatchNorm operator"""
     return AttrCvt(
         op_name='BatchNorm',
-        transforms={'epsilon': ('eps', (1e-5), _change_eps_cudnn)},
+        transforms={'epsilon': 'eps'},
+        extras={'cudnn_off': 1},
         ignores=['spatial', 'is_test', 'consumed_inputs'])
 
 def _activation(name):
