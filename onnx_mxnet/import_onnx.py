@@ -16,7 +16,7 @@
 """ Support import export formats."""
 from __future__ import absolute_import as _abs
 import mxnet as mx
-from onnx_mxnet.import_helper import _identity_list, _convert_map
+from onnx_mxnet.import_helper import _identity_list, _convert_map, _pad_sequence_fix
 
 def _convert_operator(op_name, attrs, identity_list=None, convert_map=None):
     """Convert from onnx operator to mxnet operator.
@@ -111,13 +111,13 @@ class GraphProto(object):
             op_name = node.op_type
             node_name = node.name.strip()
             node_name = node_name if node_name else None
-            attr = self._parse_attr(node.attribute)
-            new_op, new_attr = _convert_operator(op_name, attr)
+            onnx_attr = self._parse_attr(node.attribute)
+            new_op, mx_attr = _convert_operator(op_name, onnx_attr)
             inputs = [self._nodes[self._renames.get(i, i)] for i in node.input]
 
             # some workarounds for onnx problem
-            new_attr = self._fix_bias(new_op, new_attr, len(inputs))
-            new_attr = self._fix_channels(new_op, new_attr, list(node.input))
+            mx_attr = self._fix_bias(new_op, mx_attr, len(inputs))
+            mx_attr = self._fix_channels(new_op, mx_attr, list(node.input))
             self._fix_bias_shape(node.op_type, graph.node[idx - 1].op_type, node.input)
 
             # calling again to get new symbols after some workarounds
@@ -127,14 +127,19 @@ class GraphProto(object):
             # mxnet's equivalent linalg_gemm doesn't. So using combination of
             # transpose and FullyConnected operators.
             if op_name == 'Gemm':
-                new_op, inputs, new_attr = self._fix_gemm('FullyConnected', inputs, attr)
+                new_op, inputs, mx_attr = self._fix_gemm('FullyConnected', inputs, onnx_attr)
 
             # onnx slice works on multiple axes whereas mxnet's slice_axis is for single axis
             if op_name == 'Slice':
-                op = self._fix_slice(inputs, new_attr)
+                op = self._fix_slice(inputs, mx_attr)
+            elif op_name == 'AveragePool' and onnx_attr.get('pads') is not None or \
+                                    op_name == 'MaxPool' and onnx_attr.get('pads') is not None:
+                op = self._fix_pooling(op_name, inputs, onnx_attr)
             else:
-                op = new_op(name=node_name, *inputs, **new_attr)
+                op = new_op(name=node_name, *inputs, **mx_attr)
+
             node_output = self._fix_outputs(op_name, node.output)
+
             assert len(node_output) == len(op.list_outputs()), (
                 "Number of output mismatch {} vs {} in {}.".format(
                     len(node_output), len(op.list_outputs()), op_name))
@@ -175,6 +180,19 @@ class GraphProto(object):
 
         # now return the outputs
         return op
+
+    def _fix_pooling(self, op_name, inputs, new_attr):
+        """onnx pooling operator supports asymmetrical padding
+        Adding pad operator before pooling in mxnet to work with onnx"""
+        pool_type = 'avg' if op_name == 'AveragePool' else 'max'
+        stride = new_attr.get('strides')
+        kernel = new_attr.get('kernel_shape')
+        padding = new_attr.get('pads')
+        pad_width = (0, 0, 0, 0) + _pad_sequence_fix(padding)
+        new_pad_op = mx.sym.pad(inputs[0], mode='constant', pad_width=pad_width)
+        new_pooling_op = mx.sym.Pooling(new_pad_op, pool_type=pool_type,
+                                        stride=stride, kernel=kernel)
+        return new_pooling_op
 
     def _fix_slice(self, inputs, new_attr):
         """onnx slice provides slicing on multiple axis. Adding multiple slice_axis operator
@@ -258,7 +276,7 @@ class GraphProto(object):
 
     def _fix_bias_shape(self, op_name, last_op_name, inputs):
         """A workaround to reshape bias term to (1, num_channel)."""
-        if op_name == 'Add' and last_op_name == 'Conv':
+        if op_name == 'Add' and last_op_name == 'Conv' or op_name == 'Mul' or op_name == 'Add':
             assert len(list(inputs)) == 2
             bias_name = self._renames.get(inputs[1], inputs[1])
             bias = self._params[bias_name]

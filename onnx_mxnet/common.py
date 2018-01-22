@@ -15,7 +15,6 @@
 # pylint: disable=invalid-name,no-self-use,too-many-branches,too-few-public-methods,too-many-arguments
 """Shared functions and classes for frontends."""
 from __future__ import absolute_import as _abs
-import warnings
 from mxnet.base import string_types
 
 class Renamer(object):
@@ -93,8 +92,6 @@ class AttributeConverter(object):
         for k in attrs.keys():
             if k in self._excludes:
                 raise NotImplementedError("Attribute {} not supported yet.".format(k))
-            elif k in self._disables:
-                warnings.warn("Attribute {} is disabled in sym.{}".format(k, op_name))
             elif k in self._ignores:
                 pass
             elif k in self._transforms:

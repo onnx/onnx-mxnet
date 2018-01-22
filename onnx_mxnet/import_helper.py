@@ -62,10 +62,9 @@ def _pooling(name):
         transforms={
             'kernel_shape': 'kernel',
             'strides': 'stride',
-            'pads': ('pad', (0, 0), _revert_caffe2_pad)},
+            'pads': 'pad'},
         # pooling convention full to match caffe2
-        extras={'pool_type': name, 'pooling_convention':'full'},
-        ignores=['dilations'],
+        extras={'pool_type': name, 'pooling_convention':'valid'},
         custom_check=_dimension_constraint())
 
 def _conv():
@@ -88,21 +87,17 @@ def _conv_transpose():
             'kernel_shape': 'kernel',
             'strides': 'stride',
             'dilations': ('dilate', (0, 0)),
-            'pads': ('pad', (0, 0), _revert_caffe2_pad)},
+            'pads': ('pad', (0, 0), _revert_caffe2_pad),
+            'group': ('num_group', 1)},
         disables=['output_shape'],
         custom_check=_dimension_constraint())
-
-def _change_eps_cudnn(attr):
-    """Limiting eps value to 1e-5 for cudnn batchnorm."""
-    if attr < 1e-5:
-        attr = 1e-4
-    return attr
 
 def _batch_norm():
     """converting attributes for BatchNorm operator"""
     return AttrCvt(
         op_name='BatchNorm',
-        transforms={'epsilon': ('eps', (1e-5), _change_eps_cudnn)},
+        transforms={'epsilon': 'eps'},
+        extras={'cudnn_off': 1},
         ignores=['spatial', 'is_test', 'consumed_inputs'])
 
 def _activation(name):
@@ -118,9 +113,9 @@ def _pad_sequence_fix(attr):
     mxnet: (x1_begin, x1_end, ... , xn_begin, xn_end)
     onnx: (x1_begin, x2_begin, ... , xn_end, xn_end)"""
     new_attr = ()
-    if len(attr)%2 == 0:
-        for index in range(len(attr) / 2):
-            new_attr = new_attr + attr[index::len(attr) / 2]
+    if len(attr) % 2 == 0:
+        for index in range(int(len(attr) / 2)):
+            new_attr = new_attr + attr[index::int(len(attr) / 2)]
     return new_attr
 
 def _pad():

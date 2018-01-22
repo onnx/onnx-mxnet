@@ -36,7 +36,7 @@ URLS = {
 def extract_file(model_tar):
     """Extract tar file and returns model path and input, output data"""
     # extract tar file
-    tar = tarfile.open(model_tar, "r:gz")
+    tar = tarfile.open(model_tar, "r:*")
     tar.extractall()
     tar.close()
     path = model_tar.rsplit('_', 1)[0]
@@ -53,14 +53,15 @@ def verify_onnx_forward_impl(model_path, input_data, output_data):
     """Verifies result after inference"""
     print("Converting onnx format to mxnet's symbol and params...")
     sym, params = onnx_mxnet.import_model(model_path)
+
     # create module
     mod = mx.mod.Module(symbol=sym, data_names=['input_0'], context=mx.cpu(), label_names=None)
     mod.bind(for_training=False, data_shapes=[('input_0', input_data.shape)], label_shapes=None)
-    mod.set_params(arg_params=params, aux_params=None)
+    mod.set_params(arg_params=params, aux_params=params, allow_missing=True, allow_extra=True)
     # run inference
     Batch = namedtuple('Batch', ['data'])
 
-    mod.forward(Batch([mx.nd.array(input_data)]))
+    mod.forward(Batch([mx.nd.array(input_data)]), is_train=False)
 
     # Run the model with an onnx backend and verify the results
     npt.assert_equal(mod.get_outputs()[0].shape, output_data.shape)
@@ -81,8 +82,8 @@ if __name__ == '__main__':
     verify_model('bvlc_alexnet_onnx') # working
     verify_model('vgg16_onnx') # working
     verify_model('vgg19_onnx')  # working
-    # verify_model('inception_v1_onnx') # working, accuracy is different
-    # verify_model('inception_v2_onnx') # [WIP]
-    # verify_model('shufflenet_onnx') # [WIP]
-    # verify_model('densenet121_onnx') # [WIP]
-    # verify_model('resnet50_onnx') # [WIP]
+    #verify_model('inception_v1_onnx') # working, accuracy is different 1.4
+    #verify_model('inception_v2_onnx') # working, accuracy is different 7.4
+    #verify_model('shufflenet_onnx') # working, accuracy is different 10.2
+    verify_model('densenet121_onnx') # working
+    #verify_model('resnet50_onnx') # working, accuracy is different 18.1
