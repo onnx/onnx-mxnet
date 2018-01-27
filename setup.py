@@ -16,13 +16,13 @@ pkgs = find_packages()
 
 setup(
     name='onnx-mxnet',
-    version='0.3.2',
+    version='0.4.1',
     description='ONNX-MXNet Model converter',
     url='https://github.com/onnx/onnx-mxnet',
     keywords='ONNX MXNet model converter deep learning',
     packages=pkgs,
-    install_requires=['mxnet>=0.11.0', 'onnx>=0.2'],
-    tests_require=['mxnet>=0.11.0', 'onnx>=0.2', 'numpy', 'pylint'],
+    install_requires=['mxnet>=0.11.0', 'onnx>=1.0.1'],
+    tests_require=['pytest', 'pylint'],
     include_package_data=True,
     license='Apache 2.0'
 )
