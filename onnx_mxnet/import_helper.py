@@ -196,11 +196,11 @@ _convert_map = {
     'Flatten'       : Renamer('Flatten'),
     'LRN'           : AttrCvt('LRN', {'bias': 'knorm', 'size' : 'nsize'}),
     # defs/reduction
-    'ReduceMax'     : AttrCvt('max', {'axes', 'axis'}),
-    'ReduceMin'     : AttrCvt('min', {'axes', 'axis'}),
-    'ReduceSum'     : AttrCvt('sum', {'axes', 'axis'}),
-    'ReduceMean'    : AttrCvt('mean', {'axes', 'axis'}),
-    'ReduceProd'    : AttrCvt('prod', {'axes', 'axis'}),
+    'ReduceMax'     : AttrCvt('max', {'axes': 'axis'}),
+    'ReduceMin'     : AttrCvt('min', {'axes': 'axis'}),
+    'ReduceSum'     : AttrCvt('sum', {'axes': 'axis'}),
+    'ReduceMean'    : AttrCvt('mean', {'axes': 'axis'}),
+    'ReduceProd'    : AttrCvt('prod', {'axes': 'axis'}),
     # 'ReduceLogSumExp'
     # 'ArgMax'        : _arg_op('argmax'),
     # 'ArgMin'        : _arg_op('argmin'),
