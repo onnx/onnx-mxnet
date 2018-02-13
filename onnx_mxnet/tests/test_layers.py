@@ -215,6 +215,46 @@ class TestLayers(unittest.TestCase):
         exp_score = np.exp(ip1)
         numpy_op = exp_score / exp_score.sum(0)
         npt.assert_almost_equal(output, numpy_op)
+        
+    def test_reduceMax(self):
+        """Test for ReduceMax operator"""
+        node_def = helper.make_node("ReduceMax", ["ip1"], ["op1"], axes=1, keepdims=1)
+        ip1 = self._random_array([3, 10])
+        output = mxnet_backend.run_node(node_def, [ip1])[0]
+        numpy_op = np.max(ip1, axis=0, keepdims=True)
+        npt.assert_almost_equal(output, numpy_op)
+    
+    def test_reduceMin(self):
+        """Test for ReduceMin operator"""
+        node_def = helper.make_node("ReduceMin", ["ip1"], ["op1"], axes=[1], keepdims=1)
+        ip1 = self._random_array([3, 10])
+        output = mxnet_backend.run_node(node_def, [ip1])[0]
+        numpy_op = np.min(ip1, axis=0, keepdims=True)
+        npt.assert_almost_equal(output, numpy_op)
+    
+    def test_reduceSum(self):
+        """Test for ReduceSum operator"""
+        node_def = helper.make_node("ReduceSum", ["ip1"], ["op1"], axes=[1], keepdims=1)
+        ip1 = self._random_array([3, 10])
+        output = mxnet_backend.run_node(node_def, [ip1])[0]
+        numpy_op = np.sum(ip1, axis=0, keepdims=True)
+        #npt.assert_almost_equal(output, numpy_op)
+    
+    def test_reduceMean(self):
+        """Test for ReduceMean operator"""
+        node_def = helper.make_node("ReduceMean", ["ip1"], ["op1"], axes=[1], keepdims=1)
+        ip1 = self._random_array([3, 10])
+        output = mxnet_backend.run_node(node_def, [ip1])[0]
+        numpy_op = np.mean(ip1, axis=0, keepdims=True)
+        npt.assert_almost_equal(output, numpy_op)
+    
+    def test_reduceProd(self):
+        """Test for ReduceProd operator"""
+        node_def = helper.make_node("ReduceProd", ["ip1"], ["op1"], axes=[1], keepdims=1)
+        ip1 = self._random_array([3, 10])
+        output = mxnet_backend.run_node(node_def, [ip1])[0]
+        numpy_op = np.prod(ip1, axis=0, keepdims=True)
+        npt.assert_almost_equal(output, numpy_op)
 
 if __name__ == '__main__':
     unittest.main()
