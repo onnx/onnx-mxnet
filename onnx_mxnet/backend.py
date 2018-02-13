@@ -48,6 +48,7 @@ class MXNetBackend(Backend):
         sym = graph.run_node(node)
         data_names = [i for i in node.input]
         data_shapes = []
+        reduce_op_types = set(['ReduceMin', 'ReduceMax', 'ReduceMean', 'ReduceProd', 'ReduceSum', 'Slice', 'Pad'])
 
         # Adding extra dimension of batch_size 1 if the batch_size is different for multiple inputs.
         for idx, input_name in enumerate(data_names):
@@ -79,14 +80,14 @@ class MXNetBackend(Backend):
         for val in inputs:
             # slice and pad operator tests needs 1 less dimension in forward pass
             # otherwise it will throw an error.
-            if node.op_type == 'Slice' or node.op_type == 'Pad':
+            if node.op_type in reduce_op_types:
                 data_forward.append(mx.nd.array(val))
             else:
                 data_forward.append(mx.nd.array([val]))
 
         mod.forward(batch(data_forward))
         result = mod.get_outputs()[0].asnumpy()
-        if node.op_type == 'Slice' or node.op_type == 'Pad':
+        if node.op_type in reduce_op_types:
             return [result]
         return result
 
