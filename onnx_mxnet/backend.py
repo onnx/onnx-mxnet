@@ -79,7 +79,8 @@ class MXNetBackend(Backend):
         for val in inputs:
             # slice and pad operator tests needs 1 less dimension in forward pass
             # otherwise it will throw an error.
-            if node.op_type == 'Slice' or node.op_type == 'Pad':
+            # for squeeze operator, need to retain shape of input as provided
+            if node.op_type == 'Slice' or node.op_type == 'Pad' or node.op_type == 'Squeeze':
                 data_forward.append(mx.nd.array(val))
             else:
                 data_forward.append(mx.nd.array([val]))

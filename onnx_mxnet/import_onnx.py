@@ -135,8 +135,12 @@ class GraphProto(object):
             elif op_name == 'AveragePool' and onnx_attr.get('pads') is not None or \
                                     op_name == 'MaxPool' and onnx_attr.get('pads') is not None:
                 op = self._fix_pooling(op_name, inputs, onnx_attr)
+            elif op_name == 'Squeeze':
+                op =  self._fix_squeeze(inputs, mx_attr)
             else:
                 op = new_op(name=node_name, *inputs, **mx_attr)
+
+
 
             node_output = self._fix_outputs(op_name, node.output)
 
@@ -171,6 +175,8 @@ class GraphProto(object):
         # onnx slice works on multiple axes whereas mxnet's slice_axis is for single axis
         if op_name == 'Slice':
             op = self._fix_slice(sym_list, new_attr)
+        elif op_name == 'Squeeze':
+            op = self._fix_squeeze(sym_list, new_attr)
         else:
             op = new_op(*sym_list, **new_attr)
 
@@ -205,6 +211,15 @@ class GraphProto(object):
             for i, axis in enumerate(axes):
                 slice_op = mx.sym.slice_axis(slice_op, axis=axis, begin=begin[i], end=end[i])
         return slice_op
+
+    def _fix_squeeze(self, inputs, new_attr):
+        axes = new_attr.get('axis')
+        op = mx.sym.split(inputs[0], axis=axes[0], num_outputs=1, squeeze_axis=1)
+        if len(axes) > 1:
+            for i in axes[1:]:
+                assert i == 1
+                op = mx.sym.split(op, axis=i-1 ,num_outputs=1, squeeze_axis=1)
+        return op
 
     def _fix_gemm(self, op_name, inputs, old_attr):
         """Using FullyConnected operator in place of linalg_gemm to perform same operation"""

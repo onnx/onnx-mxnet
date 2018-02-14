@@ -213,6 +213,6 @@ _convert_map = {
     'Pad'           : _pad(),
     'Slice'         : AttrCvt('slice_axis', {'axes': 'axis', 'ends': 'end', 'starts': 'begin'}),
     'Transpose'     : AttrCvt('transpose', {'perm': 'axes'}),
+    'Squeeze'       : AttrCvt('split', {'axes': 'axis'})
     # 'Gather'
-    # 'Squeeze'
 }
