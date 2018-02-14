@@ -213,6 +213,12 @@ class GraphProto(object):
         return slice_op
 
     def _fix_squeeze(self, inputs, new_attr):
+        """
+        MXNet doesnt have a squeeze operator.
+        Using "split" to perform similar operation.
+        "split" can be slower compared to "reshape".
+        Remove this implementation once mxnet adds the support.
+        """
         axes = new_attr.get('axis')
         op = mx.sym.split(inputs[0], axis=axes[0], num_outputs=1, squeeze_axis=1)
         if len(axes) > 1:
