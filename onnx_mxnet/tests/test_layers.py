@@ -14,7 +14,6 @@ import numpy as np
 import numpy.testing as npt
 from onnx import helper
 from onnx_mxnet import backend as mxnet_backend
-from unicodedata import decimal
 
 class TestLayers(unittest.TestCase):
     """Tests for different layers comparing output with numpy operators.
