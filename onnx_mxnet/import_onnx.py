@@ -136,7 +136,7 @@ class GraphProto(object):
                                     op_name == 'MaxPool' and onnx_attr.get('pads') is not None:
                 op = self._fix_pooling(op_name, inputs, onnx_attr)
             elif op_name == 'Squeeze':
-                op =  self._fix_squeeze(inputs, mx_attr)
+                op = self._fix_squeeze(inputs, mx_attr)
             else:
                 op = new_op(name=node_name, *inputs, **mx_attr)
 
@@ -223,7 +223,7 @@ class GraphProto(object):
         op = mx.sym.split(inputs[0], axis=axes[0], num_outputs=1, squeeze_axis=1)
         if len(axes) > 1:
             for i in axes[1:]:
-                op = mx.sym.split(op, axis=i-1 ,num_outputs=1, squeeze_axis=1)
+                op = mx.sym.split(op, axis=i-1, num_outputs=1, squeeze_axis=1)
         return op
 
     def _fix_gemm(self, op_name, inputs, old_attr):
