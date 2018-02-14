@@ -14,6 +14,7 @@ import numpy as np
 import numpy.testing as npt
 from onnx import helper
 from onnx_mxnet import backend as mxnet_backend
+from unicodedata import decimal
 
 class TestLayers(unittest.TestCase):
     """Tests for different layers comparing output with numpy operators.
@@ -238,7 +239,7 @@ class TestLayers(unittest.TestCase):
         ip1 = self._random_array([3, 10])
         output = mxnet_backend.run_node(node_def, [ip1])[0]
         numpy_op = np.sum(ip1, axis=(1, 0), keepdims=True)
-        npt.assert_almost_equal(output, numpy_op)
+        npt.assert_almost_equal(output, numpy_op, decimal=5)
 
     def test_reduce_mean(self):
         """Test for ReduceMean operator"""
@@ -246,7 +247,7 @@ class TestLayers(unittest.TestCase):
         ip1 = self._random_array([3, 10])
         output = mxnet_backend.run_node(node_def, [ip1])[0]
         numpy_op = np.mean(ip1, axis=(1, 0), keepdims=True)
-        npt.assert_almost_equal(output, numpy_op)
+        npt.assert_almost_equal(output, numpy_op, decimal=5)
 
     def test_reduce_prod(self):
         """Test for ReduceProd operator"""
@@ -254,7 +255,7 @@ class TestLayers(unittest.TestCase):
         ip1 = self._random_array([3, 10])
         output = mxnet_backend.run_node(node_def, [ip1])[0]
         numpy_op = np.prod(ip1, axis=(1, 0), keepdims=True)
-        npt.assert_almost_equal(output, numpy_op)
+        npt.assert_almost_equal(output, numpy_op, decimal=5)
 
 if __name__ == '__main__':
     unittest.main()
