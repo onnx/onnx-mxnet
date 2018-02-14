@@ -223,7 +223,6 @@ class GraphProto(object):
         op = mx.sym.split(inputs[0], axis=axes[0], num_outputs=1, squeeze_axis=1)
         if len(axes) > 1:
             for i in axes[1:]:
-                assert i == 1
                 op = mx.sym.split(op, axis=i-1 ,num_outputs=1, squeeze_axis=1)
         return op
 
