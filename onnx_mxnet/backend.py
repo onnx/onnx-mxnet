@@ -49,7 +49,7 @@ class MXNetBackend(Backend):
         data_names = [i for i in node.input]
         data_shapes = []
         reduce_op_types = set(['ReduceMin', 'ReduceMax', 'ReduceMean',
-                               'ReduceProd', 'ReduceSum', 'Slice', 'Pad'])
+                               'ReduceProd', 'ReduceSum', 'Slice', 'Pad', 'Squeeze'])
 
         # Adding extra dimension of batch_size 1 if the batch_size is different for multiple inputs.
         for idx, input_name in enumerate(data_names):
@@ -81,6 +81,7 @@ class MXNetBackend(Backend):
         for val in inputs:
             # slice and pad operator tests needs 1 less dimension in forward pass
             # otherwise it will throw an error.
+            # for squeeze operator, need to retain shape of input as provided
             if node.op_type in reduce_op_types:
                 data_forward.append(mx.nd.array(val))
             else:
