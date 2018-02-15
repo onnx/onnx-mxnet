@@ -87,7 +87,7 @@ class MXNetBackend(Backend):
 
         mod.forward(batch(data_forward))
         result = mod.get_outputs()[0].asnumpy()
-        if node.op_type == 'Slice' or node.op_type == 'Pad':
+        if node.op_type == 'Slice' or node.op_type == 'Pad' or node.op_type == 'Squeeze':
             return [result]
         return result
 
