@@ -140,8 +140,6 @@ class GraphProto(object):
             else:
                 op = new_op(name=node_name, *inputs, **mx_attr)
 
-
-
             node_output = self._fix_outputs(op_name, node.output)
 
             assert len(node_output) == len(op.list_outputs()), (
