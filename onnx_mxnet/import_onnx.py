@@ -107,7 +107,7 @@ class GraphProto(object):
 
         # constructing nodes, nodes are stored as directed acyclic graph
         # converting NodeProto message
-        for idx, node in enumerate(graph.node):
+        for node in graph.node:
             op_name = node.op_type
             node_name = node.name.strip()
             node_name = node_name if node_name else None
