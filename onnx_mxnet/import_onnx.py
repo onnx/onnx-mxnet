@@ -107,7 +107,7 @@ class GraphProto(object):
 
         # constructing nodes, nodes are stored as directed acyclic graph
         # converting NodeProto message
-        for idx, node in enumerate(graph.node):
+        for node in graph.node:
             op_name = node.op_type
             node_name = node.name.strip()
             node_name = node_name if node_name else None
@@ -118,7 +118,7 @@ class GraphProto(object):
             # some workarounds for onnx problem
             mx_attr = self._fix_bias(new_op, mx_attr, len(inputs))
             mx_attr = self._fix_channels(new_op, mx_attr, list(node.input))
-            self._fix_bias_shape(node.op_type, graph.node[idx - 1].op_type, node.input)
+            self._fix_bias_shape(node.op_type, node.input, onnx_attr)
 
             # calling again to get new symbols after some workarounds
             inputs = [self._nodes[self._renames.get(i, i)] for i in node.input]
@@ -292,9 +292,10 @@ class GraphProto(object):
         return attrs
 
 
-    def _fix_bias_shape(self, op_name, last_op_name, inputs):
+    def _fix_bias_shape(self, op_name, inputs, attrs):
         """A workaround to reshape bias term to (1, num_channel)."""
-        if op_name == 'Add' and last_op_name == 'Conv' or op_name == 'Mul' or op_name == 'Add':
+        if (op_name == 'Add' or op_name == 'Mul') and \
+                ('broadcast' in attrs and attrs['broadcast'] == 1):
             assert len(list(inputs)) == 2
             bias_name = self._renames.get(inputs[1], inputs[1])
             bias = self._params[bias_name]
