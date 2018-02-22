@@ -47,7 +47,7 @@ class AttributeConverter(object):
         `op_name = func(attr)`
     transforms : dict of `new_name, or (new_name, default_value, transform function)`
         If only a new_name is provided, it's like renaming the attribute name.
-        If default_value if provded, then the attribute is considered as optional.
+        If default_value if provided, then the attribute is considered as optional.
         If transform function is provided, the original attribute value is handled
         by transform function.
     excludes : list
