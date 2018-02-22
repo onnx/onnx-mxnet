@@ -42,7 +42,7 @@ def extract_file(model_tar):
     path = model_tar.rsplit('_', 1)[0]
     # return model, inputs, outputs path
     cur_dir = os.path.abspath(os.path.dirname(__file__))
-    model_path = os.path.join(cur_dir, path, 'model.pb')
+    model_path = os.path.join(cur_dir, path, 'model.onnx')
     npz_path = os.path.join(cur_dir, path, 'test_data_0.npz')
     sample = np.load(npz_path, encoding='bytes')
     input_data = list(sample['inputs'])
