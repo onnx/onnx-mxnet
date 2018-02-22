@@ -116,7 +116,7 @@ def _pad_sequence_fix(attr, kernelDim):
     if len(attr) % 2 == 0:
         for index in range(int(len(attr) / 2)):
             new_attr = new_attr + attr[index::int(len(attr) / 2)]
-        # Making sure pad values are in the attr for all axis.
+        # Making sure pad values are in the attr for all axes.
         while len(new_attr) < kernelDim*2:
             new_attr = new_attr + (0, 0)
 
