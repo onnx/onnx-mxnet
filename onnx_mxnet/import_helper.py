@@ -181,7 +181,8 @@ _convert_map = {
     'Min'           : Renamer('minimum'), #elemwise minimum
     'Sum'           : Renamer('add_n'), #elemwise sum
     # softmax default axis is different in onnx
-    'Softmax'       : AttrCvt('softmax', extras={'axis': 1}),
+    'Softmax'       : Renamer('softmax'),
+    'LogSoftMax'    : Renamer('log_softmax'),
 
     # defs/nn
     'AveragePool'   : _pooling('avg'),
@@ -193,7 +194,7 @@ _convert_map = {
     'BatchNormalization': _batch_norm(),
     'SpatialBN'     : _batch_norm(),
     'Dropout'       : AttrCvt('Dropout', {'ratio': 'p'}, ignores=['is_test']),
-    'Flatten'       : Renamer('Flatten'),
+    'Flatten'       : Renamer('flatten'),
     'LRN'           : AttrCvt('LRN', {'bias': 'knorm', 'size' : 'nsize'}),
     # defs/reduction
     'ReduceMax'     : AttrCvt('max', {'axes': 'axis'}),
@@ -202,17 +203,19 @@ _convert_map = {
     'ReduceMean'    : AttrCvt('mean', {'axes': 'axis'}),
     'ReduceProd'    : AttrCvt('prod', {'axes': 'axis'}),
     # 'ReduceLogSumExp'
-    # 'ArgMax'        : _arg_op('argmax'),
-    # 'ArgMin'        : _arg_op('argmin'),
+    'ArgMax'        : Renamer('argmax'),
+    'ArgMin'        : Renamer('argmin'),
 
     # defs/tensor
     'Cast'          : AttrCvt('cast', {'to': 'dtype'}),
-    'Reshape'       : AttrCvt('reshape', {'shape': 'shape'}),
+    'Reshape'       : Renamer('reshape'),
     'Concat'        : AttrCvt('concat', {'axis': 'dim'}),
     'Split'         : AttrCvt('split', {'split': 'num_outputs'}),
     'Pad'           : _pad(),
     'Slice'         : AttrCvt('slice_axis', {'axes': 'axis', 'ends': 'end', 'starts': 'begin'}),
     'Transpose'     : AttrCvt('transpose', {'perm': 'axes'}),
     'Squeeze'       : AttrCvt('split', {'axes': 'axis'}),
-    # 'Gather'
+    'Gather'        : Renamer('take'), # _gather 
+    'Clip'          : AttrCvt('clip', {'min': 'a_min', 'max': 'a_max'})
+    
 }
