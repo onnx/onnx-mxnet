@@ -182,7 +182,6 @@ _convert_map = {
     'Sum'           : Renamer('add_n'), #elemwise sum
     # softmax default axis is different in onnx
     'Softmax'       : Renamer('softmax'),
-    'LogSoftMax'    : Renamer('log_softmax'),
 
     # defs/nn
     'AveragePool'   : _pooling('avg'),
@@ -214,8 +213,6 @@ _convert_map = {
     'Pad'           : _pad(),
     'Slice'         : AttrCvt('slice_axis', {'axes': 'axis', 'ends': 'end', 'starts': 'begin'}),
     'Transpose'     : AttrCvt('transpose', {'perm': 'axes'}),
-    'Squeeze'       : AttrCvt('split', {'axes': 'axis'}),
-    'Gather'        : Renamer('take'), # _gather 
-    'Clip'          : AttrCvt('clip', {'min': 'a_min', 'max': 'a_max'})
+    'Squeeze'       : AttrCvt('split', {'axes': 'axis'})
     
 }
