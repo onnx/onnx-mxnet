@@ -263,5 +263,12 @@ class TestLayers(unittest.TestCase):
         output = mxnet_backend.run_node(node_def, [ip1])[0]
         npt.assert_almost_equal(output, np.squeeze(ip1, axis=[1, 3]))
 
+    def test_upsample(self):
+        """Test for Upsampling operator for nearest mode"""
+        node_def = helper.make_node("Upsample", ["ip1"], ["op1"], height_scale=2, mode='nearest', width_scale=2)
+        ip1 = self._random_array([1, 1, 2, 2])
+        output = mxnet_backend.run_node(node_def, [ip1])[0]
+        npt.assert_almost_equal(output, ip1.repeat(2, axis=2).repeat(2, axis=3))
+
 if __name__ == '__main__':
     unittest.main()

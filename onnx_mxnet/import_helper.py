@@ -128,7 +128,7 @@ def _pad():
         op_name='pad',
         transforms={
             'pads': ('pad_width', (0, 0, 0, 0, 0, 0, 0, 0), _pad_sequence_fix),
-            'value':'constant_value'})
+            'value': 'constant_value'})
 
 def _global_pooling(name):
     """Requires kernel attribute which is not present in onnx currently.
@@ -138,6 +138,18 @@ def _global_pooling(name):
         extras={'global_pool': True,
                 'kernel': (1, 1),
                 'pool_type': name})
+
+def _upsample_scale_fix(attr):
+    """Scale attribute conversion from float to int"""
+    return int(attr)
+
+def _upsample(name):
+    """Upsampling attributes conversion"""
+    return AttrCvt(
+        op_name=name,
+        transforms={'height_scale': ('scale', 1, _upsample_scale_fix),
+                    'mode': 'sample_type',
+                    'width_scale': ('scale', 1, _upsample_scale_fix)})
 
 # compatible operators that do NOT require any conversion.
 _identity_list = []
@@ -219,4 +231,5 @@ _convert_map = {
     'Transpose'     : AttrCvt('transpose', {'perm': 'axes'}),
     'Squeeze'       : AttrCvt('split', {'axes': 'axis'}),
     # 'Gather'
+    'Upsample'      : _upsample('UpSampling')
 }
