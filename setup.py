@@ -10,13 +10,23 @@
 
 # pylint: disable=invalid-name, exec-used
 """Setup onnx-mxnet package"""
+
+# To build and upload a new version, follow the steps below.
+# Notes:
+# - this is a "Universal Wheels" package that is pure Python and supports both Python2 and Python3
+# - Twine is a secure PyPi upload package
+# $ pip install twine
+# $ pip install wheel
+# $ python setup.py bdist_wheel --universal
+# $ twine upload dist/*
+
 from setuptools import setup, find_packages
 
 pkgs = find_packages()
 
 setup(
     name='onnx-mxnet',
-    version='0.4.1',
+    version='0.4.2',
     description='ONNX-MXNet Model converter',
     url='https://github.com/onnx/onnx-mxnet',
     keywords='ONNX MXNet model converter deep learning',

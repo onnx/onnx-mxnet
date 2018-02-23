@@ -192,7 +192,7 @@ class GraphProto(object):
         stride = new_attr.get('strides')
         kernel = new_attr.get('kernel_shape')
         padding = new_attr.get('pads')
-        pad_width = (0, 0, 0, 0) + _pad_sequence_fix(padding)
+        pad_width = (0, 0, 0, 0) + _pad_sequence_fix(padding, len(kernel))
         new_pad_op = mx.sym.pad(inputs[0], mode='constant', pad_width=pad_width)
         new_pooling_op = mx.sym.Pooling(new_pad_op, pool_type=pool_type,
                                         stride=stride, kernel=kernel)
