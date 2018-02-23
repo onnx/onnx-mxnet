@@ -144,7 +144,7 @@ def _upsample_scale_fix(attr):
     return int(attr)
 
 def _upsample(name):
-    """Upsampling attributes conversion"""
+    """converting attributes for UpSampling operator"""
     return AttrCvt(
         op_name=name,
         transforms={'height_scale': ('scale', 1, _upsample_scale_fix),
