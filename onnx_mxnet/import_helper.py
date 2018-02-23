@@ -150,7 +150,7 @@ def _upsample_restrict_mode(attr):
     For now, only nearest mode is enabled."""
     if attr.decode() != 'nearest':
         raise ValueError("Only nearest mode is supported: {}".format(attr))
-    return attr
+    return attr.decode()
 
 def _upsample(name):
     """converting attributes for UpSampling operator"""
