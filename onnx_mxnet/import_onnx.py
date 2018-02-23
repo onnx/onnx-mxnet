@@ -115,7 +115,7 @@ class GraphProto(object):
             new_op, mx_attr = _convert_operator(op_name, onnx_attr)
             inputs = [self._nodes[self._renames.get(i, i)] for i in node.input]
 
-            # some workarounds for onnx problem
+            # some workarounds for inconsistencies in onnx and mxnet conventions.
             mx_attr = self._fix_bias(new_op, mx_attr, len(inputs))
             mx_attr = self._fix_channels(new_op, mx_attr, list(node.input))
             self._fix_bias_shape(node.op_type, node.input, onnx_attr)
