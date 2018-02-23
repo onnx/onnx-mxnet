@@ -146,7 +146,7 @@ def _upsample_scale_fix(attr):
 def _upsample_restrict_mode(attr):
     """Mxnet's current UpSampling operator doesn't work well in bilinear mode.
     New operator is coming in this PR https://github.com/apache/incubator-mxnet/pull/9688/
-    Will change the operator for bilinear mode once new one is available.
+    Issue to track this: https://github.com/onnx/onnx-mxnet/issues/33
     For now, only nearest mode is enabled."""
     if attr.decode() != 'nearest':
         raise ValueError("Only nearest mode is supported: {}".format(attr))
