@@ -32,7 +32,37 @@ backend_test.exclude('test_resnet50')
 backend_test.exclude('test_shufflenet')
 
 # Not implemented
-backend_test.exclude('test_constant_cpu')
+unimplemented_operators = [
+    'test_and*',
+    'test_clip*',
+    'test_equal*',
+    'test_gather*',
+    'test_greater*',
+    'test_hardmax*',
+    'test_hardsigmoid*',
+    'test_less*',
+    'test_logsoftmax*',
+    'test_mean*',
+    'test_not*',
+    'test_or*',
+    'test_selu*',
+    'test_shape*',
+    'test_size*',
+    'test_softplus*',
+    'test_softsign*',
+    'test_thresholdedrelu*',
+    'test_top*',
+    'test_unsqueeze*',
+    'test_xor*',
+    'test_Embedding*',
+    'test_PReLU*',
+    'test_Softplus*',
+    'test_Upsample*',
+    'test_operator*',
+    'test_constant_cpu'
+    ]
+for op_test in unimplemented_operators:
+    backend_test.exclude(op_test)
 
 # import all test cases at global scope to make them visible to python.unittest
 globals().update(backend_test
