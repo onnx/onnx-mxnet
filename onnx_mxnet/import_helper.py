@@ -197,7 +197,7 @@ _convert_map = {
     'BatchNormalization': _batch_norm(),
     'SpatialBN'     : _batch_norm(),
     'Dropout'       : AttrCvt('Dropout', {'ratio': 'p'}, ignores=['is_test']),
-    'Flatten'       : Renamer('Flatten'),
+    'Flatten'       : Renamer('flatten'),
     'LRN'           : AttrCvt('LRN', {'bias': 'knorm', 'size' : 'nsize'}),
     # defs/reduction
     'ReduceMax'     : AttrCvt('max', {'axes': 'axis'}),
@@ -206,12 +206,12 @@ _convert_map = {
     'ReduceMean'    : AttrCvt('mean', {'axes': 'axis'}),
     'ReduceProd'    : AttrCvt('prod', {'axes': 'axis'}),
     # 'ReduceLogSumExp'
-    # 'ArgMax'        : _arg_op('argmax'),
-    # 'ArgMin'        : _arg_op('argmin'),
+    'ArgMax'        : Renamer('argmax'),
+    'ArgMin'        : Renamer('argmin'),
 
     # defs/tensor
     'Cast'          : AttrCvt('cast', {'to': 'dtype'}),
-    'Reshape'       : AttrCvt('reshape', {'shape': 'shape'}),
+    'Reshape'       : Renamer('reshape'),
     'Concat'        : AttrCvt('concat', {'axis': 'dim'}),
     'Split'         : AttrCvt('split', {'split': 'num_outputs'}),
     'Pad'           : _pad(),
