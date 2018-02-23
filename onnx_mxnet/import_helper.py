@@ -143,12 +143,21 @@ def _upsample_scale_fix(attr):
     """Scale attribute conversion from float to int"""
     return int(attr)
 
+def _upsample_restrict_mode(attr):
+    """Mxnet's current UpSampling operator doesn't work well in bilinear mode.
+    New operator is coming in this PR https://github.com/apache/incubator-mxnet/pull/9688/
+    Will change the operator for bilinear mode once new one is available.
+    For now, only nearest mode is enabled."""
+    if attr != 'nearest':
+        raise ValueError("Only nearest mode is supported: {}".format(attr))
+    return attr
+
 def _upsample(name):
     """converting attributes for UpSampling operator"""
     return AttrCvt(
         op_name=name,
         transforms={'height_scale': ('scale', 1, _upsample_scale_fix),
-                    'mode': 'sample_type',
+                    'mode': ('sample_type', 'nearest', _upsample_restrict_mode),
                     'width_scale': ('scale', 1, _upsample_scale_fix)})
 
 # compatible operators that do NOT require any conversion.
