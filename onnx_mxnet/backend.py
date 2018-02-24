@@ -50,7 +50,7 @@ class MXNetBackend(Backend):
         data_shapes = []
         reduce_op_types = set(['ReduceMin', 'ReduceMax', 'ReduceMean',
                                'ReduceProd', 'ReduceSum', 'Slice', 'Pad',
-                               'Squeeze', 'Reshape'])
+                               'Squeeze', 'Upsample', 'Reshape'])
 
         # Adding extra dimension of batch_size 1 if the batch_size is different for multiple inputs.
         for idx, input_name in enumerate(data_names):
