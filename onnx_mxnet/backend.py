@@ -47,10 +47,10 @@ class MXNetBackend(Backend):
             if node.input[index] == 'W':
                 dim = inputs[index].shape
                 param_tensor = helper.make_tensor(
-                                   name=node.input[index],
-                                   data_type=TensorProto.FLOAT,
-                                   dims=dim,
-                                   vals=inputs[index].flatten())
+                    name=node.input[index],
+                    data_type=TensorProto.FLOAT,
+                    dims=dim,
+                    vals=inputs[index].flatten())
 
                 initializer.append(param_tensor)
 
