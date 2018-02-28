@@ -310,6 +310,21 @@ class TestLayers(unittest.TestCase):
         output = mxnet_backend.run_node(node_with_padding, [x, W])[0]
         npt.assert_almost_equal(output, y_with_padding)
 
+    def test_max(self):
+        """ Test max operator"""
+        data_0 = self._random_array([3, 2, 1])
+        data_1 = self._random_array([1, 4, 4])
+        data_2 = self._random_array([2, 5, 3])
+        result = self._random_array([3, 5, 4])
+
+        node = helper.make_node('Max', inputs=['data_0', 'data_1', 'data_2'], outputs=['result'])
+        output = mxnet_backend.run_node(node, [data_0, data_1, data_2])[0]
+        npt.assert_almost_equal(output, result)
+
+        node = helper.make_node('Max', inputs=['data_0'], outputs=['result'])
+        output = mxnet_backend.run_node(node, [data_0])[0]
+        npt.assert_almost_equal(output, data_0)
+
 
 if __name__ == '__main__':
     unittest.main()
