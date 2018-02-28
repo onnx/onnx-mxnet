@@ -18,7 +18,6 @@ from onnx import helper, TensorProto
 from .import_onnx import GraphProto
 from .backend_rep import MXNetBackendRep
 
-
 # Using these functions for onnx test infrastructure.
 # Implemented by following onnx docs guide:
 # https://github.com/onnx/onnx/blob/master/docs/Implementing%20an%20ONNX%20backend.md
@@ -120,7 +119,7 @@ class MXNetBackend(Backend):
 
         # initializing parameters for calculating result of each individual node
         if int(len(params)) > 0:
-            mod.set_params(arg_params=params, aux_params=None)
+            mod.set_params(arg_params=params, aux_params=params)
         else:
             mod.init_params()
 
