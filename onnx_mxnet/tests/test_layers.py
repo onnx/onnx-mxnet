@@ -278,5 +278,38 @@ class TestLayers(unittest.TestCase):
         output = mxnet_backend.run_node(node_def, [input1])[0]
         npt.assert_almost_equal(output, np.reshape(input1, [3, 2, 2, 2]))
 
+    def test_conv(self):
+        """ Test for Conv operator"""
+        # (1, 1, 5, 5) input tensor
+        x = np.array([[[[0., 1., 2., 3., 4.],
+                        [5., 6., 7., 8., 9.],
+                        [10., 11., 12., 13., 14.],
+                        [15., 16., 17., 18., 19.],
+                        [20., 21., 22., 23., 24.]]]]).astype(np.float32)
+        # (1, 1, 3, 3) tensor for convolution weights
+        W = np.array([[[[1., 1., 1.],
+                        [1., 1., 1.],
+                        [1., 1., 1.]]]]).astype(np.float32)
+        # (1, 1, 5, 5) output tenso
+        y_with_padding = np.array([[[[12., 21., 27., 33., 24.],
+                                     [33., 54., 63., 72., 51.],
+                                     [63., 99., 108., 117., 81.],
+                                     [93., 144., 153., 162., 111.],
+                                     [72., 111., 117., 123., 84.]]]]).astype(np.float32)
+
+        # Convolution with padding
+        # Default values for other attributes: strides=[1, 1], dilations=[1, 1], groups=1
+        node_with_padding = helper.make_node(
+            'Conv',
+            inputs=['x', 'W'],
+            outputs=['y'],
+            kernel_shape=[3, 3],
+            pads=[1, 1, 1, 1],
+        )
+
+        output = mxnet_backend.run_node(node_with_padding, [x, W])[0]
+        npt.assert_almost_equal(output, y_with_padding)
+
+
 if __name__ == '__main__':
     unittest.main()
