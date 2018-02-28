@@ -312,18 +312,18 @@ class TestLayers(unittest.TestCase):
 
     def test_max(self):
         """ Test max operator"""
-        data_0 = self._random_array([3, 2, 1])
-        data_1 = self._random_array([1, 4, 4])
-        data_2 = self._random_array([2, 5, 3])
-        result = self._random_array([3, 5, 4])
+        input1 = np.array([3, 2, 1]).astype(np.float32)
+        input2 = np.array([1, 4, 4]).astype(np.float32)
+        input3 = np.array([2, 5, 3]).astype(np.float32)
+        result = np.array([3, 5, 4]).astype(np.float32)
 
-        node = helper.make_node('Max', inputs=['data_0', 'data_1', 'data_2'], outputs=['result'])
-        output = mxnet_backend.run_node(node, [data_0, data_1, data_2])[0]
+        node = helper.make_node("Max", ["input1", "input2", "input3"], ["result"])
+        output = mxnet_backend.run_node(node, [input1, input2, input3])[0]
         npt.assert_almost_equal(output, result)
 
-        node = helper.make_node('Max', inputs=['data_0'], outputs=['result'])
-        output = mxnet_backend.run_node(node, [data_0])[0]
-        npt.assert_almost_equal(output, data_0)
+        node = helper.make_node("Max", ["input1"], ["result"])
+        output = mxnet_backend.run_node(node, [input1])[0]
+        npt.assert_almost_equal(output, input1)
 
 
 if __name__ == '__main__':
