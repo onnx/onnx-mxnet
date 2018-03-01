@@ -137,7 +137,9 @@ class GraphProto(object): # pylint: disable=too-few-public-methods
                 op = self._fix_pooling(op_name, inputs, onnx_attr)
             elif op_name == 'Squeeze':
                 op = self._fix_squeeze(inputs, mx_attr)
-            elif node_name is  None:
+            elif op_name == 'Max' or op_name == 'Min':
+                op = self._fix_max_min(op_name, inputs)
+            elif node_name is None:
                 op = new_op(*inputs, **mx_attr)
             else:
                 op = new_op(name=node_name, *inputs, **mx_attr)
@@ -195,6 +197,24 @@ class GraphProto(object): # pylint: disable=too-few-public-methods
         for i in axes[1:]:
             op = mx.sym.split(op, axis=i-1, num_outputs=1, squeeze_axis=1)
         return op
+
+    def _fix_max_min(self, op_name, inputs):
+        """ MXNet maximum/minimum compares only two symbols at a time.
+            ONNX can send more than two to compare.
+            Breaking into multiple mxnet ops to compare two symbols at a time"""
+        if len(inputs) > 1:
+            if op_name == 'Max':
+                op = mx.sym.maximum(inputs[0], inputs[1])
+                for ip in inputs[2:]:
+                    op = mx.sym.maximum(op, ip)
+            elif op_name == 'Min':
+                op = mx.sym.minimum(inputs[0], inputs[1])
+                for ip in inputs[2:]:
+                    op = mx.sym.minimum(op, ip)
+        else:
+            op = inputs[0]
+        return op
+
 
     def _fix_gemm(self, op_name, inputs, old_attr):
         """Using FullyConnected operator in place of linalg_gemm to perform same operation"""
