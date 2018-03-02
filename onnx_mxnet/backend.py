@@ -11,7 +11,6 @@
 # coding: utf-8
 # pylint: disable=too-many-locals,invalid-name
 """backend wrapper for onnx test infrastructure"""
-from collections import namedtuple
 import mxnet as mx
 from onnx.backend.base import Backend
 from onnx import helper, TensorProto
@@ -89,12 +88,12 @@ class MXNetBackend(Backend):
             result obtained after running the operator
         """
         graph = GraphProto()
-        sym, params = graph.from_onnx(MXNetBackend.make_graph(node, inputs))
-        data_names = [i for i in sym.get_internals().list_inputs() if i[:-1] == "input_"]
+        sym, _ = graph.from_onnx(MXNetBackend.make_graph(node, inputs))
+        data_names = [i for i in sym.get_internals().list_inputs()]
         data_shapes = []
         reduce_op_types = set(['ReduceMin', 'ReduceMax', 'ReduceMean',
                                'ReduceProd', 'ReduceSum', 'Slice', 'Pad',
-                               'Squeeze', 'Upsample', 'Reshape', 'Conv'])
+                               'Squeeze', 'Upsample', 'Reshape', 'Conv', 'ConvTranspose'])
 
         # Adding extra dimension of batch_size 1 if the batch_size is different for multiple inputs.
         for idx, input_name in enumerate(data_names):
@@ -118,12 +117,7 @@ class MXNetBackend(Backend):
         mod.bind(for_training=False, data_shapes=data_shapes, label_shapes=None)
 
         # initializing parameters for calculating result of each individual node
-        if int(len(params)) > 0:
-            mod.set_params(arg_params=params, aux_params=params)
-        else:
-            mod.init_params()
-
-        batch = namedtuple('Batch', ['data'])
+        mod.init_params()
 
         data_forward = []
         for idx, input_name in enumerate(data_names):
@@ -136,7 +130,7 @@ class MXNetBackend(Backend):
             else:
                 data_forward.append(mx.nd.array([val]))
 
-        mod.forward(batch(data_forward))
+        mod.forward(mx.io.DataBatch(data_forward))
         result = mod.get_outputs()[0].asnumpy()
         if node.op_type in reduce_op_types:
             return [result]

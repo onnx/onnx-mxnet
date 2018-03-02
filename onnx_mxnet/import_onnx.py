@@ -311,9 +311,16 @@ class GraphProto(object): # pylint: disable=too-few-public-methods
         else:
             wshape = self._params[weight_name].shape
             assert len(wshape) >= 2, "Weights shape is invalid: {}".format(wshape)
-            channels = wshape[0]
+
             if op in [mx.sym.FullyConnected]:
-                attrs['num_hidden'] = channels
+                attrs['num_hidden'] = wshape[0]
             else:
-                attrs['num_filter'] = channels
+                if op == mx.sym.Convolution:
+                    # Weight shape for Conv and FC: (M x C x kH x kW) : M is number of
+                    # feature maps/hidden  and C is number of channels
+                    attrs['num_filter'] = wshape[0]
+                elif op == mx.sym.Deconvolution:
+                    # Weight shape for DeConv : (C x M x kH x kW) : M is number of
+                    # feature maps/filters and C is number of channels
+                    attrs['num_filter'] = wshape[1]
         return attrs

@@ -325,6 +325,32 @@ class TestLayers(unittest.TestCase):
         output = mxnet_backend.run_node(node, [input1])[0]
         npt.assert_almost_equal(output, input1)
 
+    def test_deconv(self):
+        """ Test Deconvolution operator"""
+        input1 = np.arange(9).reshape((1, 1, 3, 3))
+        weight = np.ones(shape=(1, 3, 3, 3))
+
+        result = np.array([[[[0., 1., 3., 3., 2.],
+                             [3., 8., 15., 12., 7.],
+                             [9., 21., 36., 27., 15.],
+                             [9., 20., 33., 24., 13.],
+                             [6., 13., 21., 15., 8.]],
+                            [[0., 1., 3., 3., 2.],
+                             [3., 8., 15., 12., 7.],
+                             [9., 21., 36., 27., 15.],
+                             [9., 20., 33., 24., 13.],
+                             [6., 13., 21., 15., 8.]],
+                            [[0., 1., 3., 3., 2.],
+                             [3., 8., 15., 12., 7.],
+                             [9., 21., 36., 27., 15.],
+                             [9., 20., 33., 24., 13.],
+                             [6., 13., 21., 15., 8.]]]])
+
+        node_def = helper.make_node("ConvTranspose", ["input1", "W"], ["Y"], kernel_shape=(3, 3))
+        output = mxnet_backend.run_node(node_def, [input1, weight])[0]
+        npt.assert_almost_equal(output, result)
+
+
 
 if __name__ == '__main__':
     unittest.main()
