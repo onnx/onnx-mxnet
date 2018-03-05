@@ -67,7 +67,7 @@ test_image = np.array(img_y)[np.newaxis, np.newaxis, :, :]
 # By default, 'input_0' is an input of the imported model.
 mod = mx.mod.Module(symbol=sym, data_names=['input_0'], context=mx.cpu(), label_names=None)
 mod.bind(for_training=False, data_shapes=[('input_0',test_image.shape)], label_shapes=None)
-mod.set_params(arg_params=params, aux_params=None, allow_missing=True)
+mod.set_params(arg_params=params, aux_params=params, allow_missing=True, allow_extra=True)
 ```
 
 - Run inference
