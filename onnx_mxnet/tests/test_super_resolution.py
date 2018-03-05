@@ -37,7 +37,7 @@ x = np.array(img_y)[np.newaxis, np.newaxis, :, :]
 # create module
 mod = mx.mod.Module(symbol=sym, data_names=['input_0'], label_names=None)
 mod.bind(for_training=False, data_shapes=[('input_0', x.shape)])
-mod.set_params(arg_params=params, aux_params=None)
+mod.set_params(arg_params=params, aux_params=params, allow_missing=True, allow_extra=True)
 
 # run inference
 Batch = namedtuple('Batch', ['data'])
