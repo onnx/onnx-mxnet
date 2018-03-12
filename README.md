@@ -12,9 +12,9 @@ With ONNX format support for MXNet, developers can build and train models with P
 
 ## Installation
 ### Prerequisite
-Install ONNX which needs protobuf compiler to be installed separately. Please follow the instructions to install ONNX [here](https://github.com/onnx/onnx).
+**Install ONNX** which needs protobuf compiler to be installed separately. Please **follow the instructions to install ONNX** [here](https://github.com/onnx/onnx).
 
-Then, you can install onnx-mxnet package as follows:
+**Then**, you can install onnx-mxnet package as follows:
 
 ```
 pip install onnx-mxnet
