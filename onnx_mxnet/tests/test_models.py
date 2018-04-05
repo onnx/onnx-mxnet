@@ -19,6 +19,8 @@ import mxnet as mx
 from mxnet.test_utils import download
 import numpy as np
 import numpy.testing as npt
+import onnx
+from onnx import numpy_helper
 import onnx_mxnet
 
 URLS = {
@@ -33,6 +35,13 @@ URLS = {
     'vgg19_onnx' : 'https://s3.amazonaws.com/download.onnx/models/vgg19.tar.gz'
 }
 
+def read_pb_file(data_file):
+    """ Helper function to get data from pb files"""
+    tensor = onnx.TensorProto()
+    with open(data_file, 'rb') as pb_file:
+        tensor.ParseFromString(pb_file.read())
+    return numpy_helper.to_array(tensor)
+
 def extract_file(model_tar):
     """Extract tar file and returns model path and input, output data"""
     # extract tar file
@@ -43,10 +52,17 @@ def extract_file(model_tar):
     # return model, inputs, outputs path
     cur_dir = os.path.abspath(os.path.dirname(__file__))
     model_path = os.path.join(cur_dir, path, 'model.onnx')
-    npz_path = os.path.join(cur_dir, path, 'test_data_0.npz')
-    sample = np.load(npz_path, encoding='bytes')
-    input_data = list(sample['inputs'])
-    output_data = list(sample['outputs'])
+    # Currently testing for one dataet only
+    # TODO: extend for multiple dataset.
+    test_path = os.path.join(cur_dir, path, 'test_data_set_0')
+
+    input_data = None
+    output_data = None
+    for test_file in os.listdir(test_path):
+        if test_file.startswith('input'):
+            input_data = read_pb_file(os.path.join(test_path, test_file))
+        elif test_file.startswith('output'):
+            output_data = read_pb_file(os.path.join(test_path, test_file))
     return model_path, input_data, output_data
 
 def verify_onnx_forward_impl(model_path, input_data, output_data):
@@ -73,8 +89,8 @@ def verify_model(name):
     print("Testing model ", name)
     download(URLS.get(name), name)
     model_path, inputs, outputs = extract_file(name)
-    input_data = np.asarray(inputs[0], dtype=np.float32)
-    output_data = np.asarray(outputs[0], dtype=np.float32)
+    input_data = np.asarray(inputs, dtype=np.float32)
+    output_data = np.asarray(outputs, dtype=np.float32)
     verify_onnx_forward_impl(model_path, input_data, output_data)
 
 if __name__ == '__main__':
