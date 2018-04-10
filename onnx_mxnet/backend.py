@@ -69,7 +69,7 @@ class MXNetBackend(Backend):
 
 
     @classmethod
-    def run_node(cls, node, inputs, device='CPU'):
+    def run_node(cls, node, inputs, device='CPU'):  # pylint: disable=arguments-differ
         """Running individual node inference on mxnet engine and
         return the result to onnx test infrastructure.
 
